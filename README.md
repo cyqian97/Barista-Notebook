@@ -1,17 +1,17 @@
 ## Project Setup
 ### Create Frontend and Backend
-1. Spin up the development environment. Change directory to the parent folder of the app and run the following command
+- Spin up the development environment. Change directory to the parent folder of the app and run the following command
 ```
 docker run -it --name <Dev Env Name> -v .:/usr/app cyqian97/node:22-ubuntu22.04 bash
 ```
-1. Create a react frontend app. In the development container, run: 
+- Create a react frontend app. In the development container, run: 
 ```
 cd /usr/app
 npm init react-app --legacy-peer-deps <Frontend Name>
 npm install --legacy-peer-deps ajv@^8
 ```
 This step install all necessary packages in the frontend folder. The ```npm install``` process will take forever in the ```node:22-alpine``` docker image, so I created the ```cyqian97/node:22-ubuntu22.04``` image and handle all the npm installations.
-1. Create a flask backend. Still in the container, run
+- Create a flask backend. Still in the container, run
 ```
 mkdir <Backend Name> && cd <Backend Name>
 python3 -m venv venv
