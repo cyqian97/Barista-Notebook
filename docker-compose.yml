@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./barista-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./barista-app:/usr/src/app
+    stdin_open: true
+
+  backend:
+    build:
+      context: ./flask-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./flask-backend:/app
+    environment:
+      - FLASK_ENV=development
