@@ -11,6 +11,19 @@ db = SQLAlchemy(app)
 class CoffeeBean(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
+    country = db.Column(db.String(80), nullable=False)
+    process = db.Column(db.String(80), nullable=False)
+    roast = db.Column(db.String(80), nullable=True)
+    region = db.Column(db.String(80), nullable=True)
+    farm = db.Column(db.String(80), nullable=True)
+    variety = db.Column(db.String(80), nullable=True)
+    drying = db.Column(db.String(80), nullable=True)
+    roaster = db.Column(db.String(80), nullable=True)
+    harvest_year = db.Column(db.Integer, nullable=False)
+    harvest_month = db.Column(db.Integer, nullable=False)
+    note = db.Column(db.String(500), nullable=True)
+    last_use_date = db.Column(db.DateTime, nullable=True)
+    
 
 class BrewingMethod(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,13 +41,28 @@ class CoffeeResult(db.Model):
 #     db.create_all()
 
 
-# API Routes
-@app.route('/beans/', methods=['GET'])
+@app.route('/coffee-beans/', methods=['GET'])
 def get_coffee_beans():
-    beans = CoffeeBean.query.all()
-    # Serialize the data
-    beans_data = [{"id": bean.id, "name": bean.name} for bean in beans]
-    return jsonify(beans=beans_data)
+    coffee_beans = CoffeeBean.query.order_by(CoffeeBean.last_use_date.desc().nullslast()).all()
+    result = [
+        {
+            "id": bean.id,
+            "name": bean.name,
+            "country": bean.country,
+            "process": bean.process,
+            "roast": bean.roast,
+            "region": bean.region,
+            "farm": bean.farm,
+            "variety": bean.variety,
+            "drying": bean.drying,
+            "roaster": bean.roaster,
+            "harvest_year": bean.harvest_year,
+            "harvest_month": bean.harvest_month,
+            "note": bean.note
+        } for bean in coffee_beans
+    ]
+    return jsonify(result)
+
 
 # Test Route
 @app.route('/')

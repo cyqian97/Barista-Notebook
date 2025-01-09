@@ -10,7 +10,7 @@ cd /usr/app
 npm init react-app --legacy-peer-deps <Frontend Name>
 npm install --legacy-peer-deps ajv@^8
 ```
-This step install all necessary packages in the frontend folder. The ```npm install``` process will take forever in the ```node:22-alpine``` docker image, so I created the ```cyqian97/node:22-ubuntu22.04``` image and handle all the npm installations.
+This step installs all necessary packages in the frontend folder. The ```npm install``` process takes forever in the ```node:22-alpine``` docker image, so I created the ```cyqian97/node:22-ubuntu22.04``` image to handle all the npm installations. This can avoid the ```npm install``` process in the latter ```docker-compose up``` step.
 - Create a flask backend. Still in the container, run
 ```
 mkdir <Backend Name> && cd <Backend Name>
