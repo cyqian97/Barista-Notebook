@@ -1,5 +1,14 @@
 ## Project Setup
+### Run the Project
+Create a ```Dockerfile``` in the frontend folder and the backend folder, and a ```docker-compose.yml``` file in the ```/usr/app``` folder. See the github repository for the content of these files. 
+Run the following commands to build and run the frontend and backend images:
+```
+docker-compose build
+docker-compose up 
+```
+
 ### Create Frontend and Backend
+(P.S.: I am using npm installed in WSL directily now, so ignore the node:22-ubuntu22.04 docker part.)
 - Spin up the development environment. Change directory to the parent folder of the app and run the following command
 ```
 docker run -it --name <Dev Env Name> -v .:/usr/app cyqian97/node:22-ubuntu22.04 bash
@@ -18,10 +27,8 @@ python3 -m venv venv
 source venv/bin/activate
 pip install flask flask-sqlalchemy
 ```
-### Docker Images to Hold the Frond and and Backend
-Create a ```Dockerfile``` in the frontend folder and the backend folder, and a ```docker-compose.yml``` file in the ```/usr/app``` folder. See the github repository for the content of these files. 
-Run the following commands to build and run the frontend and backend images:
-```
-docker-compose build
-docker-compose up 
-```
+
+## Frontend
+### Configure Backend Url
+The backend url is set in the ```.env.development``` and ```.env.production``` files.
+The first file is used when the frontend docker runs ```npm start```; the second is used when ```npm run build``` is executed.
