@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
@@ -62,6 +62,48 @@ def get_coffee_beans():
         } for bean in coffee_beans
     ]
     return jsonify(result)
+
+@app.route('/coffee-beans/', methods=['POST'])
+def add_coffee_bean():
+    data = request.json
+    new_bean = CoffeeBean(
+        name=data['name'],
+        country=data['country'],
+        process=data['process'],
+        roast=data.get('roast'),
+        region=data.get('region'),
+        farm=data.get('farm'),
+        variety=data.get('variety'),
+        drying=data.get('drying'),
+        roaster=data.get('roaster'),
+        harvest_year=data['harvest_year'],
+        harvest_month=data['harvest_month'],
+        note=data.get('note')
+    )
+    db.session.add(new_bean)
+    db.session.commit()
+    return jsonify({
+        "id": new_bean.id,
+        "name": new_bean.name,
+        "country": new_bean.country,
+        "process": new_bean.process,
+        "roast": new_bean.roast,
+        "region": new_bean.region,
+        "farm": new_bean.farm,
+        "variety": new_bean.variety,
+        "drying": new_bean.drying,
+        "roaster": new_bean.roaster,
+        "harvest_year": new_bean.harvest_year,
+        "harvest_month": new_bean.harvest_month,
+        "note": new_bean.note
+    }), 201
+
+@app.route('/coffee-beans/<int:id>', methods=['DELETE'])
+def delete_coffee_bean(id):
+    bean = CoffeeBean.query.get_or_404(id)
+    db.session.delete(bean)
+    db.session.commit()
+    return jsonify({"message": "Coffee bean deleted successfully"}), 200
 
 
 # Test Route
