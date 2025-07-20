@@ -53,6 +53,17 @@ function App() {
       });
   }, []);
 
+  // Synchronize filteredBeans with coffeeBeans and filters
+  useEffect(() => {
+    setFilteredBeans(
+      coffeeBeans.filter((bean) =>
+        Object.keys(filters).every((key) =>
+          filters[key] ? bean[key]?.toString().includes(filters[key]) : true
+        )
+      )
+    );
+  }, [coffeeBeans, filters]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewBean({ ...newBean, [name]: value });
@@ -73,7 +84,7 @@ function App() {
         return response.json();
       })
       .then((data) => {
-        setCoffeeBeans([...coffeeBeans, data]);
+        setCoffeeBeans([...coffeeBeans, data]); // Update coffeeBeans
         setNewBean({
           name: "",
           country: "",
@@ -102,7 +113,29 @@ function App() {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        setCoffeeBeans(coffeeBeans.filter((bean) => bean.id !== id));
+        const updatedCoffeeBeans = coffeeBeans.filter((bean) => bean.id !== id);
+        setCoffeeBeans(updatedCoffeeBeans);
+
+        // Reset filters if no coffee beans match the current filter
+        const updatedFilteredBeans = updatedCoffeeBeans.filter((bean) =>
+          Object.keys(filters).every((key) =>
+            filters[key] ? bean[key]?.toString().includes(filters[key]) : true
+          )
+        );
+        if (updatedFilteredBeans.length === 0) {
+          setFilters({
+            country: "",
+            process: "",
+            roast: "",
+            region: "",
+            farm: "",
+            variety: "",
+            drying: "",
+            roaster: "",
+            harvest_year: "",
+            harvest_month: "",
+          });
+        }
       })
       .catch((error) => {
         console.error("Error deleting coffee bean:", error);
@@ -111,20 +144,9 @@ function App() {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-  
-    // Update the filters state
-    const updatedFilters = { ...filters, [name]: value };
-    setFilters(updatedFilters);
-  
-    // Filter coffee beans based on the updated filters
-    setFilteredBeans(
-      coffeeBeans.filter((bean) =>
-        Object.keys(updatedFilters).every((key) =>
-          updatedFilters[key] ? bean[key]?.toString().includes(updatedFilters[key]) : true
-        )
-      )
-    );
+    setFilters({ ...filters, [name]: value });
   };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -133,7 +155,6 @@ function App() {
   const getUniqueValues = (field) => [
     ...new Set(coffeeBeans.map((bean) => bean[field]).filter(Boolean)),
   ];
-
 
   return (
     <div>
