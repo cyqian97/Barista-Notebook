@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-
-const BASE_URL = "http://localhost:5000/coffee-beans/";
+import BASE_URL from "./config";
+// const BASE_URL = "http://localhost:5000/coffee-beans/";
 
 function App() {
   const [coffeeBeans, setCoffeeBeans] = useState([]);
