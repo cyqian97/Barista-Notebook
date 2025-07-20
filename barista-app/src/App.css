@@ -36,3 +36,26 @@
     transform: rotate(360deg);
   }
 }
+
+.limited-width {
+  max-width: 150px; /* Set a reasonable maximum width */
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflowing content */
+  text-overflow: ellipsis; /* Add ellipsis (...) for overflow */
+}
+.limited-width:hover {
+  overflow: visible; /* Show full text on hover */
+  white-space: normal; /* Allow wrapping on hover */
+  background-color: #f0f0f0; /* Optional: change background color on hover */
+  z-index: 1; /* Ensure it appears above other elements */
+}
+
+table {
+  table-layout: fixed; /* Enforce fixed column widths */
+  width: 100%; /* Ensure the table spans the container */
+}
+
+th, td {
+  padding: 8px; /* Add padding for better readability */
+  text-align: left; /* Align text to the left */
+}

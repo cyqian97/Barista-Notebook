@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import BASE_URL from "./config";
-// const BASE_URL = "http://localhost:5000/coffee-beans/";
+import './App.css';
 
 function App() {
   const [coffeeBeans, setCoffeeBeans] = useState([]);
+  const [filteredBeans, setFilteredBeans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newBean, setNewBean] = useState({
     name: "",
@@ -19,6 +20,18 @@ function App() {
     harvest_month: "",
     note: "",
   });
+  const [filters, setFilters] = useState({
+    country: "",
+    process: "",
+    roast: "",
+    region: "",
+    farm: "",
+    variety: "",
+    drying: "",
+    roaster: "",
+    harvest_year: "",
+    harvest_month: "",
+  });
 
   useEffect(() => {
     // Fetch coffee beans from the Flask backend
@@ -31,6 +44,7 @@ function App() {
       })
       .then((data) => {
         setCoffeeBeans(data);
+        setFilteredBeans(data); // Initialize filtered beans
         setLoading(false);
       })
       .catch((error) => {
@@ -95,13 +109,58 @@ function App() {
       });
   };
 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+  
+    // Update the filters state
+    const updatedFilters = { ...filters, [name]: value };
+    setFilters(updatedFilters);
+  
+    // Filter coffee beans based on the updated filters
+    setFilteredBeans(
+      coffeeBeans.filter((bean) =>
+        Object.keys(updatedFilters).every((key) =>
+          updatedFilters[key] ? bean[key]?.toString().includes(updatedFilters[key]) : true
+        )
+      )
+    );
+  };
   if (loading) {
     return <div>Loading...</div>;
   }
 
+  // Get unique values for dropdowns
+  const getUniqueValues = (field) => [
+    ...new Set(coffeeBeans.map((bean) => bean[field]).filter(Boolean)),
+  ];
+
+
   return (
     <div>
       <h1>Coffee Bean Table</h1>
+      {/* Filters */}
+      <div>
+        <h2>Filters</h2>
+        {Object.keys(filters).map((field) => (
+          <div key={field}>
+            <label>{field.charAt(0).toUpperCase() + field.slice(1)}: </label>
+            <select
+              name={field}
+              value={filters[field]}
+              onChange={handleFilterChange}
+            >
+              <option value="">All</option>
+              {getUniqueValues(field).map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
+      </div>
+
+      {/* Coffee Bean Table */}
       <table>
         <thead>
           <tr>
@@ -110,33 +169,33 @@ function App() {
             <th>Country</th>
             <th>Process</th>
             <th>Roast</th>
-            <th>Region</th>
-            <th>Farm</th>
+            <th className="limited-width">Region</th>
+            <th className="limited-width">Farm</th>
             <th>Variety</th>
             <th>Drying</th>
-            <th>Roaster</th>
+            <th className="limited-width">Roaster</th>
             <th>Harvest Year</th>
             <th>Harvest Month</th>
-            <th>Note</th>
+            <th className="limited-width">Note</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {coffeeBeans.map((bean) => (
+          {filteredBeans.map((bean) => (
             <tr key={bean.id}>
               <td>{bean.id}</td>
               <td>{bean.name}</td>
               <td>{bean.country}</td>
               <td>{bean.process}</td>
               <td>{bean.roast}</td>
-              <td>{bean.region}</td>
-              <td>{bean.farm}</td>
+              <td className="limited-width">{bean.region}</td>
+              <td className="limited-width">{bean.farm}</td>
               <td>{bean.variety}</td>
               <td>{bean.drying}</td>
-              <td>{bean.roaster}</td>
+              <td className="limited-width">{bean.roaster}</td>
               <td>{bean.harvest_year}</td>
               <td>{bean.harvest_month}</td>
-              <td>{bean.note}</td>
+              <td className="limited-width" title={bean.note}>{bean.note}</td>
               <td>
                 <button onClick={() => handleDeleteBean(bean.id)}>Delete</button>
               </td>
