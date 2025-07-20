@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 
+const BASE_URL = "http://localhost:5000/coffee-beans/";
+
 function App() {
   const [coffeeBeans, setCoffeeBeans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ function App() {
 
   useEffect(() => {
     // Fetch coffee beans from the Flask backend
-    fetch("http://localhost:5000/coffee-beans/")
+    fetch(BASE_URL)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -43,7 +45,7 @@ function App() {
   };
 
   const handleAddBean = () => {
-    fetch("http://localhost:5000/coffee-beans/", {
+    fetch(BASE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,7 +81,7 @@ function App() {
   };
 
   const handleDeleteBean = (id) => {
-    fetch(`http://localhost:5000/coffee-beans/${id}`, {
+    fetch(`${BASE_URL}${id}`, {
       method: "DELETE",
     })
       .then((response) => {
