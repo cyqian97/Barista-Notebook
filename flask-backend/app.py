@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -19,8 +20,8 @@ class CoffeeBean(db.Model):
     variety = db.Column(db.String(80), nullable=True)
     drying = db.Column(db.String(80), nullable=True)
     roaster = db.Column(db.String(80), nullable=True)
-    harvest_year = db.Column(db.Integer, nullable=False)
-    harvest_month = db.Column(db.Integer, nullable=False)
+    harvest_year = db.Column(db.Integer, nullable=True)
+    harvest_month = db.Column(db.Integer, nullable=True)
     note = db.Column(db.String(500), nullable=True)
     last_use_date = db.Column(db.DateTime, nullable=True)
     
@@ -28,12 +29,39 @@ class CoffeeBean(db.Model):
 class BrewingMethod(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
-
-class CoffeeResult(db.Model):
+    
+class Grinder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    coffee_type_id = db.Column(db.Integer, db.ForeignKey('coffee_bean.id'), nullable=False)
-    brewing_method_id = db.Column(db.Integer, db.ForeignKey('brewing_method.id'), nullable=False)
-    result = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    
+class Brew(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    coffee_bean_id = db.Column(db.Integer, db.ForeignKey('coffee_bean.id'), nullable=False)
+    grinder_id = db.Column(db.Integer, db.ForeignKey('grinder.id'), nullable=False)
+    method_id = db.Column(db.Integer, db.ForeignKey('brewing_method.id'), nullable=False)
+    grind_size = db.Column(db.Integer, nullable=False)
+    date_brewed = db.Column(db.DateTime, default=datetime.utcnow)
+    tasting_notes = db.Column(db.Text)
+
+    coffee_bean = db.relationship('CoffeeBean', backref=db.backref('brews', lazy=True))
+    method = db.relationship('BrewingMethod', backref=db.backref('brews', lazy=True))
+
+class BrewParameter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    brew_id = db.Column(db.Integer, db.ForeignKey('brew.id'), nullable=False)
+    parameter_name = db.Column(db.String(100), nullable=False)
+    value = db.Column(db.String(100), nullable=False)
+
+    brew = db.relationship('Brew', backref=db.backref('parameters', lazy=True))
+
+class MethodParameterTemplate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    method_id = db.Column(db.Integer, db.ForeignKey('brewing_method.id'), nullable=False)
+    parameter_name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+
+    method = db.relationship('BrewingMethod', backref=db.backref('parameter_templates', lazy=True))
+
 
 # # Automatically create tables if they don't exist
 # @app.before_first_request

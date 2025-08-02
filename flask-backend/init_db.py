@@ -1,5 +1,5 @@
 # Run this script to initialize the database
-from app import app, db, CoffeeBean
+from app import app, db, CoffeeBean, Grinder
 from datetime import datetime
 
 # Sample data to populate the database
@@ -30,6 +30,10 @@ sample_beans = [
     },
 ]
 
+grinders = [
+    {"name": "Helor 101"}, {"name": "Breville Barista Express"}
+]
+
 with app.app_context():
     db.create_all()
 
@@ -56,9 +60,15 @@ with app.app_context():
                               note=bean_data["note"] if "note" in bean_data else None,
                               last_use_date=bean_data["last_use_date"] if "last_use_date" in bean_data else None)
 
-
             db.session.add(bean)
-
+            
+    for grinder_data in grinders:
+        grinder = db.session.query(Grinder).filter_by(
+            name=grinder_data["name"]).first()
+        if not grinder:
+            grinder = Grinder(name=grinder_data["name"])
+            db.session.add(grinder)
+        
     # Commit the changes to the database
     db.session.commit()
     print("Database initialized with sample entries!")
