@@ -1,5 +1,5 @@
 # Run this script to initialize the database
-from app import app, db, CoffeeBean, Grinder
+from app import app, db, CoffeeBean, Grinder, BrewingMethod, MethodParameterTemplate
 from datetime import datetime
 
 # Sample data to populate the database
@@ -32,6 +32,35 @@ sample_beans = [
 
 grinders = [
     {"name": "Helor 101"}, {"name": "Breville Barista Express"}
+]
+
+brewing_methods = [
+    {"name": "Aeropress"},
+    {"name": "Kalita"},
+    {"name": "Espresso"},
+    {"name": "Cold Brew"},
+    {"name": "Moka Pot"}
+]
+
+method_parameter_templates = [
+    # Aeropress
+    {"method_name": "Aeropress", "parameter_name": "Water Temperature", "description": "Temperature of water used for brewing"},
+    {"method_name": "Aeropress", "parameter_name": "Brew Time", "description": "Total time for brewing"},
+    {"method_name": "Aeropress", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
+    # Kalita
+    {"method_name": "Kalita", "parameter_name": "Water Temperature", "description": "Temperature of water used for brewing"},
+    {"method_name": "Kalita", "parameter_name": "Brew Time", "description": "Total time for brewing"},
+    {"method_name": "Kalita", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
+    # Espresso
+    {"method_name": "Espresso", "parameter_name": "Pressure", "description": "Pressure applied during extraction"},
+    {"method_name": "Espresso", "parameter_name": "Brew Time", "description": "Total time for brewing"},
+    {"method_name": "Espresso", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
+    # Cold Brew
+    {"method_name": "Cold Brew", "parameter_name": "Brew Time", "description": "Total time for brewing"},
+    {"method_name": "Cold Brew", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
+    # Moka Pot
+    {"method_name": "Moka Pot", "parameter_name": "Water Volume", "description": "Amount of water used"},
+    {"method_name": "Moka Pot", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
 ]
 
 with app.app_context():
@@ -68,7 +97,30 @@ with app.app_context():
         if not grinder:
             grinder = Grinder(name=grinder_data["name"])
             db.session.add(grinder)
-        
+    
+    for method_data in brewing_methods:
+        method = db.session.query(BrewingMethod).filter_by(
+            name=method_data["name"]).first()
+        if not method:
+            method = BrewingMethod(name=method_data["name"])
+            db.session.add(method)
+    
+    # Add MethodParameterTemplate entries
+    for template in method_parameter_templates:
+        method = db.session.query(BrewingMethod).filter_by(name=template["method_name"]).first()
+        if method:
+            exists = db.session.query(MethodParameterTemplate).filter_by(
+                method_id=method.id,
+                parameter_name=template["parameter_name"]
+            ).first()
+            if not exists:
+                param_template = MethodParameterTemplate(
+                    method_id=method.id,
+                    parameter_name=template["parameter_name"],
+                    description=template["description"]
+                )
+                db.session.add(param_template)
+
     # Commit the changes to the database
     db.session.commit()
     print("Database initialized with sample entries!")
