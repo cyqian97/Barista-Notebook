@@ -32,3 +32,13 @@ pip install flask flask-sqlalchemy
 ### Configure Backend Url
 The backend url is set in the ```.env.development``` and ```.env.production``` files.
 The first file is used when the frontend docker runs ```npm start```; the second is used when ```npm run build``` is executed.
+
+### Add New Package
+After add a new package to the frontend environment, a re-build of the docker image is required.
+Below is a precedure that tested to be safe:
+```
+docker compose down
+rm -rf barista-app/node_modules
+docker compose build --no-cache
+docker compose up
+```
