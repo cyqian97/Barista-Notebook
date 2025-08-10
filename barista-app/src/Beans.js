@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import BASE_URL from "./config";
-import './App.css';
+import './Beans.css';
 
-function App() {
+function Beans() {
   const [coffeeBeans, setCoffeeBeans] = useState([]);
   const [filteredBeans, setFilteredBeans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -322,4 +322,4 @@ function App() {
   );
 }
 
-export default App;
+export default Beans;
