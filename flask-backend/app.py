@@ -133,6 +133,15 @@ def delete_coffee_bean(id):
     db.session.commit()
     return jsonify({"message": "Coffee bean deleted successfully"}), 200
 
+@app.route('/grinders/')
+def get_grinders():
+    grinders = Grinder.query.all()
+    return jsonify([{"id": g.id, "name": g.name} for g in grinders])
+
+@app.route('/brewing-methods/')
+def get_brewing_methods():
+    brewing_methods = BrewingMethod.query.all()
+    return jsonify([{"id": b.id, "name": b.name} for b in brewing_methods])
 
 # Test Route
 @app.route('/')
