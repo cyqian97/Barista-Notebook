@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { COFFEE_BEAN_URL } from "./config";
 import './Beans.css';
+import ReturnHomeButton from "./ReturnHomeButton";
 
 function Beans() {
   const [coffeeBeans, setCoffeeBeans] = useState([]);
@@ -159,6 +160,7 @@ function Beans() {
   return (
     <div>
       <h1>Coffee Bean Table</h1>
+      <ReturnHomeButton />
       {/* Filters */}
       <div>
         <h2>Filters</h2>

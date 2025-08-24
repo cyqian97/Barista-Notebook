@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { COFFEE_BEAN_URL, BREW_URL, BASE_URL } from "./config";
-
+import ReturnHomeButton from "./ReturnHomeButton";
 
 function AddBrew() {
   const [coffeeBeans, setCoffeeBeans] = useState([]);
@@ -65,6 +65,7 @@ function AddBrew() {
 
   return (
     <div>
+      <ReturnHomeButton />
       <h2>Add Brew</h2>
       <form onSubmit={handleSubmit}>
         <label>
