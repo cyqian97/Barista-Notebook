@@ -143,6 +143,42 @@ def get_brewing_methods():
     brewing_methods = BrewingMethod.query.all()
     return jsonify([{"id": b.id, "name": b.name} for b in brewing_methods])
 
+@app.route('/brewing-methods/<int:method_id>/parameters/')
+def get_method_parameters(method_id):
+    templates = MethodParameterTemplate.query.filter_by(method_id=method_id).all()
+    return jsonify([
+        {"id": t.id, "parameter_name": t.parameter_name, "description": t.description}
+        for t in templates
+    ])
+
+@app.route('/brews/', methods=['POST'])
+def add_brew():
+    data = request.json
+    # Create Brew record
+    new_brew = Brew(
+        coffee_bean_id=data['coffee_bean_id'],
+        grinder_id=data['grinder_id'],
+        method_id=data['method_id'],
+        grind_size=data['grind_size'],
+        date_brewed=datetime.fromisoformat(data['date_brewed']) if data.get('date_brewed') else datetime.utcnow(),
+        tasting_notes=data.get('tasting_notes', "")
+    )
+    db.session.add(new_brew)
+    db.session.commit()  # Commit to get new_brew.id
+
+    # Add BrewParameter records
+    parameters = data.get('parameters', {})
+    for param_name, value in parameters.items():
+        param = BrewParameter(
+            brew_id=new_brew.id,
+            parameter_name=param_name,
+            value=value
+        )
+        db.session.add(param)
+    db.session.commit()
+
+    return jsonify({"message": "Brew added successfully", "brew_id": new_brew.id}), 201
+
 # Test Route
 @app.route('/')
 def home():
