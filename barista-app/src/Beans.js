@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import BASE_URL from "./config";
+import { COFFEE_BEAN_URL } from "./config";
 import './Beans.css';
 
 function Beans() {
@@ -35,7 +35,7 @@ function Beans() {
 
   useEffect(() => {
     // Fetch coffee beans from the Flask backend
-    fetch(BASE_URL)
+    fetch(COFFEE_BEAN_URL)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -70,7 +70,7 @@ function Beans() {
   };
 
   const handleAddBean = () => {
-    fetch(BASE_URL, {
+    fetch(COFFEE_BEAN_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -106,7 +106,7 @@ function Beans() {
   };
 
   const handleDeleteBean = (id) => {
-    fetch(`${BASE_URL}${id}`, {
+    fetch(`${COFFEE_BEAN_URL}${id}`, {
       method: "DELETE",
     })
       .then((response) => {

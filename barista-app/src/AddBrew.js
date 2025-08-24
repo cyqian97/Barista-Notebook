@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import BASE_URL from "./config";
+import { COFFEE_BEAN_URL, BREW_URL, BASE_URL } from "./config";
 
-const BREW_URL = BASE_URL.replace("coffee-beans/", "brews/"); // Adjust if needed
 
 function AddBrew() {
   const [coffeeBeans, setCoffeeBeans] = useState([]);
@@ -19,17 +18,17 @@ function AddBrew() {
 
   useEffect(() => {
     // Fetch coffee beans
-    fetch(BASE_URL)
+    fetch(COFFEE_BEAN_URL)
       .then((res) => res.json())
       .then(setCoffeeBeans);
 
     // Fetch grinders
-    fetch(BASE_URL.replace("coffee-beans/", "grinders/"))
+    fetch(BASE_URL + "grinders/")
       .then((res) => res.json())
       .then(setGrinders);
 
     // Fetch brewing methods
-    fetch(BASE_URL.replace("coffee-beans/", "brewing-methods/"))
+    fetch(BASE_URL + "brewing-methods/")
       .then((res) => res.json())
       .then(setMethods);
   }, []);
