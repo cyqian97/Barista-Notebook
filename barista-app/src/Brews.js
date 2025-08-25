@@ -22,38 +22,39 @@ function Brews() {
     <div>
       <ReturnHomeButton />
       <h2>All Brews</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Coffee Bean</th>
-            <th>Grinder</th>
-            <th>Method</th>
-            <th>Grind Size</th>
-            <th>Date Brewed</th>
-            <th>Tasting Notes</th>
-            <th>Parameters</th>
-          </tr>
-        </thead>
-        <tbody>
-          {brews.map((brew) => (
-            <tr key={brew.id}>
-              <td>{brew.id}</td>
-              <td>{brew.coffee_bean_name || brew.coffee_bean_id}</td>
-              <td>{brew.grinder_name || brew.grinder_id}</td>
-              <td>{brew.method_name || brew.method_id}</td>
-              <td>{brew.grind_size}</td>
-              <td>{brew.date_brewed}</td>
-              <td>{brew.tasting_notes}</td>
-              <td>
-                {brew.parameters && Object.entries(brew.parameters).map(([k, v]) => (
-                  <div key={k}>{k}: {v}</div>
-                ))}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+        {brews.map((brew) => (
+          <div
+            key={brew.id}
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              padding: "16px",
+              width: "300px",
+              background: "#fafafa",
+              boxShadow: "2px 2px 8px #eee"
+            }}
+          >
+            <h3>Brew #{brew.id}</h3>
+            <p><strong>Coffee Bean:</strong> {brew.coffee_bean_name || brew.coffee_bean_id}</p>
+            <p><strong>Grinder:</strong> {brew.grinder_name || brew.grinder_id}</p>
+            <p><strong>Method:</strong> {brew.method_name || brew.method_id}</p>
+            <p><strong>Grind Size:</strong> {brew.grind_size}</p>
+            <p><strong>Date Brewed:</strong> {brew.date_brewed}</p>
+            <p><strong>Tasting Notes:</strong> {brew.tasting_notes}</p>
+            {brew.parameters && Object.keys(brew.parameters).length > 0 && (
+              <div>
+                <strong>Parameters:</strong>
+                <ul>
+                  {Object.entries(brew.parameters).map(([k, v]) => (
+                    <li key={k}>{k}: {v}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
