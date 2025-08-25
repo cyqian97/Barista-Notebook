@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BREW_URL } from "./config";
 import ReturnHomeButton from "./ReturnHomeButton";
+import "./Brews.css";
 
 function Brews() {
   const [brews, setBrews] = useState([]);
@@ -22,19 +23,9 @@ function Brews() {
     <div>
       <ReturnHomeButton />
       <h2>All Brews</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+      <div className="brews-container">
         {brews.map((brew) => (
-          <div
-            key={brew.id}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "16px",
-              width: "300px",
-              background: "#fafafa",
-              boxShadow: "2px 2px 8px #eee"
-            }}
-          >
+          <div key={brew.id} className="brew-box">
             <h3>Brew #{brew.id}</h3>
             <p><strong>Coffee Bean:</strong> {brew.coffee_bean_name || brew.coffee_bean_id}</p>
             <p><strong>Grinder:</strong> {brew.grinder_name || brew.grinder_id}</p>
@@ -43,7 +34,7 @@ function Brews() {
             <p><strong>Date Brewed:</strong> {brew.date_brewed}</p>
             <p><strong>Tasting Notes:</strong> {brew.tasting_notes}</p>
             {brew.parameters && Object.keys(brew.parameters).length > 0 && (
-              <div>
+              <div className="brew-parameters">
                 <strong>Parameters:</strong>
                 <ul>
                   {Object.entries(brew.parameters).map(([k, v]) => (
