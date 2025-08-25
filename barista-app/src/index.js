@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import './index.css';
 import Beans from './Beans';
+import Brews from './Brews';
 import AddBrew from './AddBrew';
 import reportWebVitals from './reportWebVitals';
 
@@ -13,7 +14,8 @@ function Home() {
       <h1>Welcome to Barista Notebook</h1>
       <nav style={{ marginBottom: "20px" }}>
         <Link to="/beans"><button>Coffee Beans</button></Link>
-        <Link to="/brew"><button>Add Brew</button></Link>
+        <Link to="/addbrew"><button>Add Brew</button></Link>
+        <Link to="/brews"><button>All Brews</button></Link> 
       </nav>
       <p>Select a page above to get started.</p>
     </div>
@@ -26,7 +28,8 @@ function Main() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/beans" element={<Beans />} />
-        <Route path="/brew" element={<AddBrew />} />
+        <Route path="/addbrew" element={<AddBrew />} />
+        <Route path="/brews" element={<Brews />} />
       </Routes>
     </BrowserRouter>
   );

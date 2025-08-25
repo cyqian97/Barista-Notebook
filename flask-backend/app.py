@@ -179,6 +179,33 @@ def add_brew():
 
     return jsonify({"message": "Brew added successfully", "brew_id": new_brew.id}), 201
 
+@app.route('/brews/', methods=['GET'])
+def get_all_brews():
+    brews = Brew.query.all()
+    result = []
+    for brew in brews:
+        # Get related names if relationships are set up, else use IDs
+        coffee_bean = CoffeeBean.query.get(brew.coffee_bean_id)
+        grinder = Grinder.query.get(brew.grinder_id)
+        method = BrewingMethod.query.get(brew.method_id)
+        # Get parameters for this brew
+        parameters = BrewParameter.query.filter_by(brew_id=brew.id).all()
+        param_dict = {p.parameter_name: p.value for p in parameters}
+        result.append({
+            "id": brew.id,
+            "coffee_bean_id": brew.coffee_bean_id,
+            "coffee_bean_name": coffee_bean.name if coffee_bean else None,
+            "grinder_id": brew.grinder_id,
+            "grinder_name": grinder.name if grinder else None,
+            "method_id": brew.method_id,
+            "method_name": method.name if method else None,
+            "grind_size": brew.grind_size,
+            "date_brewed": brew.date_brewed.isoformat() if brew.date_brewed else None,
+            "tasting_notes": brew.tasting_notes,
+            "parameters": param_dict
+        })
+    return jsonify(result)
+
 # Test Route
 @app.route('/')
 def home():
