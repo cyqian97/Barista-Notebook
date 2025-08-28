@@ -8,6 +8,8 @@ function AddBrew() {
   const [methods, setMethods] = useState([]);
   const [parameterTemplates, setParameterTemplates] = useState([]);
   const [brewParameters, setBrewParameters] = useState({});
+  const [customParameters, setCustomParameters] = useState([]);
+  const [newCustomParam, setNewCustomParam] = useState({ name: "", value: "" });
   const [brewData, setBrewData] = useState({
     coffee_bean_id: "",
     grinder_id: "",
@@ -34,6 +36,7 @@ function AddBrew() {
       setParameterTemplates([]);
     }
     setBrewParameters({});
+    setCustomParameters([]);
   }, [brewData.method_id]);
 
   const handleChange = (e) => {
@@ -46,10 +49,53 @@ function AddBrew() {
     setBrewParameters({ ...brewParameters, [name]: value });
   };
 
+  const handleCustomParamChange = (e) => {
+    const { name, value } = e.target;
+    setNewCustomParam({ ...newCustomParam, [name]: value });
+  };
+
+  const handleAddCustomParam = (e) => {
+    e.preventDefault();
+    if (newCustomParam.name.trim() !== "") {
+      setCustomParameters([
+        ...customParameters,
+        { name: newCustomParam.name, value: newCustomParam.value }
+      ]);
+      setNewCustomParam({ name: "", value: "" });
+    }
+  };
+
+  const handleCustomParamValueChange = (index, value) => {
+    const updated = [...customParameters];
+    updated[index].value = value;
+    setCustomParameters(updated);
+  };
+
+  const handleRemoveParam = (paramName) => {
+    // Remove from template parameters
+    const updatedBrewParameters = { ...brewParameters };
+    delete updatedBrewParameters[paramName];
+    setBrewParameters(updatedBrewParameters);
+
+    // Remove from parameterTemplates
+    setParameterTemplates(parameterTemplates.filter(param => param.parameter_name !== paramName));
+
+    // Remove from custom parameters (if needed)
+    setCustomParameters(customParameters.filter(param => param.name !== paramName));
+  };
+
+  const handleRemoveCustomParam = (index) => {
+    setCustomParameters(customParameters.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Combine brewData and brewParameters
-    const payload = { ...brewData, parameters: brewParameters };
+    // Combine template and custom parameters
+    const allParameters = { ...brewParameters };
+    customParameters.forEach(param => {
+      allParameters[param.name] = param.value;
+    });
+    const payload = { ...brewData, parameters: allParameters };
     fetch(BREW_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -71,6 +117,7 @@ function AddBrew() {
         });
         setParameterTemplates([]);
         setBrewParameters({});
+        setCustomParameters([]);
       })
       .catch(() => setMessage("Error adding brew"));
   };
@@ -130,6 +177,7 @@ function AddBrew() {
             ))}
           </select>
         </label>
+        <br />
         <label>
           Grind Size:
           <input
@@ -167,13 +215,66 @@ function AddBrew() {
                     onChange={handleParameterChange}
                     placeholder={param.description}
                   />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveParam(param.parameter_name)}
+                    style={{ marginLeft: "8px" }}
+                  >
+                    Remove
+                  </button>
                 </label>
                 <br />
               </div>
             ))}
           </div>
         )}
-        <br />
+        {/* List custom parameters */}
+        {customParameters.length > 0 && (
+          <div>
+            <h4>Custom Parameters:</h4>
+            {customParameters.map((param, idx) => (
+              <div key={idx}>
+                <label>
+                  {param.name}:
+                  <input
+                    type="text"
+                    value={param.value}
+                    onChange={e => handleCustomParamValueChange(idx, e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCustomParam(idx)}
+                    style={{ marginLeft: "8px" }}
+                  >
+                    Remove
+                  </button>
+                </label>
+                <br />
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Custom parameters */}
+        <div>
+          <h4>Add Custom Parameter:</h4>
+          <input
+            type="text"
+            name="name"
+            value={newCustomParam.name}
+            onChange={handleCustomParamChange}
+            placeholder="Parameter Name"
+          />
+          <input
+            type="text"
+            name="value"
+            value={newCustomParam.value}
+            onChange={handleCustomParamChange}
+            placeholder="Parameter Value"
+          />
+          <button type="button" onClick={handleAddCustomParam}>
+            Add
+          </button>
+        </div>
         <br />
         <label>
           Tasting Notes:
