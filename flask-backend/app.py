@@ -86,7 +86,8 @@ def get_coffee_beans():
             "roaster": bean.roaster,
             "harvest_year": bean.harvest_year,
             "harvest_month": bean.harvest_month,
-            "note": bean.note
+            "note": bean.note,
+            "last_use_date": bean.last_use_date.isoformat() if bean.last_use_date else None
         } for bean in coffee_beans
     ]
     return jsonify(result)
@@ -143,6 +144,19 @@ def get_brewing_methods():
     brewing_methods = BrewingMethod.query.all()
     return jsonify([{"id": b.id, "name": b.name} for b in brewing_methods])
 
+@app.route('/brewing-methods/', methods=['POST'])
+def add_brewing_method():
+    data = request.json
+    name = data.get('name', '').strip()
+    if not name:
+        return jsonify({"error": "Method name is required"}), 400
+    if BrewingMethod.query.filter_by(name=name).first():
+        return jsonify({"error": "Method already exists"}), 409
+    new_method = BrewingMethod(name=name)
+    db.session.add(new_method)
+    db.session.commit()
+    return jsonify({"id": new_method.id, "name": new_method.name}), 201
+
 @app.route('/brewing-methods/<int:method_id>/parameters/')
 def get_method_parameters(method_id):
     templates = MethodParameterTemplate.query.filter_by(method_id=method_id).all()
@@ -166,8 +180,12 @@ def add_brew():
     db.session.add(new_brew)
     db.session.commit()  # Commit to get new_brew.id
 
-    # Add BrewParameter records
+    # Add BrewParameter records and save new param names to method template
     parameters = data.get('parameters', {})
+    existing_template_names = {
+        t.parameter_name
+        for t in MethodParameterTemplate.query.filter_by(method_id=new_brew.method_id).all()
+    }
     for param_name, value in parameters.items():
         param = BrewParameter(
             brew_id=new_brew.id,
@@ -175,6 +193,13 @@ def add_brew():
             value=value
         )
         db.session.add(param)
+        if param_name not in existing_template_names:
+            db.session.add(MethodParameterTemplate(
+                method_id=new_brew.method_id,
+                parameter_name=param_name,
+                description=""
+            ))
+            existing_template_names.add(param_name)
     db.session.commit()
 
     return jsonify({"message": "Brew added successfully", "brew_id": new_brew.id}), 201
@@ -188,9 +213,9 @@ def get_all_brews():
         coffee_bean = CoffeeBean.query.get(brew.coffee_bean_id)
         grinder = Grinder.query.get(brew.grinder_id)
         method = BrewingMethod.query.get(brew.method_id)
-        # Get parameters for this brew
-        parameters = BrewParameter.query.filter_by(brew_id=brew.id).all()
-        param_dict = {p.parameter_name: p.value for p in parameters}
+        # Get parameters for this brew, ordered by insertion (id)
+        parameters = BrewParameter.query.filter_by(brew_id=brew.id).order_by(BrewParameter.id).all()
+        param_list = [{"name": p.parameter_name, "value": p.value} for p in parameters]
         result.append({
             "id": brew.id,
             "coffee_bean_id": brew.coffee_bean_id,
@@ -202,7 +227,7 @@ def get_all_brews():
             "grind_size": brew.grind_size,
             "date_brewed": brew.date_brewed.isoformat() if brew.date_brewed else None,
             "tasting_notes": brew.tasting_notes,
-            "parameters": param_dict
+            "parameters": param_list
         })
     return jsonify(result)
 

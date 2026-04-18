@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { COFFEE_BEAN_URL } from "./config";
 import './Beans.css';
 import ReturnHomeButton from "./ReturnHomeButton";
 
 function Beans() {
+  const navigate = useNavigate();
   const [coffeeBeans, setCoffeeBeans] = useState([]);
   const [filteredBeans, setFilteredBeans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -220,6 +222,8 @@ function Beans() {
               <td>{bean.harvest_month}</td>
               <td className="limited-width" title={bean.note}>{bean.note}</td>
               <td>
+                <button onClick={() => navigate(`/addbrew?bean_id=${bean.id}`)}>Brew</button>
+                <button onClick={() => navigate(`/brews?bean_id=${bean.id}`)}>Show</button>
                 <button onClick={() => handleDeleteBean(bean.id)}>Delete</button>
               </td>
             </tr>

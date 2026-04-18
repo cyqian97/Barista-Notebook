@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { COFFEE_BEAN_URL, BREW_URL, BASE_URL, BREWING_METHOD_URL } from "./config";
 import ReturnHomeButton from "./ReturnHomeButton";
 
 function AddBrew() {
+  const [searchParams] = useSearchParams();
   const [coffeeBeans, setCoffeeBeans] = useState([]);
   const [grinders, setGrinders] = useState([]);
   const [methods, setMethods] = useState([]);
@@ -10,6 +12,9 @@ function AddBrew() {
   const [brewParameters, setBrewParameters] = useState({});
   const [customParameters, setCustomParameters] = useState([]);
   const [newCustomParam, setNewCustomParam] = useState({ name: "", value: "" });
+  const [coffeeDose, setCoffeeDose] = useState("");
+  const [newMethodName, setNewMethodName] = useState("");
+  const [showNewMethodInput, setShowNewMethodInput] = useState(false);
   const [brewData, setBrewData] = useState({
     coffee_bean_id: "",
     grinder_id: "",
@@ -21,12 +26,17 @@ function AddBrew() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch(COFFEE_BEAN_URL).then((res) => res.json()).then(setCoffeeBeans);
+    fetch(COFFEE_BEAN_URL).then((res) => res.json()).then((data) => {
+      setCoffeeBeans(data);
+      const beanId = searchParams.get("bean_id");
+      if (beanId) {
+        setBrewData((prev) => ({ ...prev, coffee_bean_id: beanId }));
+      }
+    });
     fetch(BASE_URL + "grinders/").then((res) => res.json()).then(setGrinders);
     fetch(BASE_URL + "brewing-methods/").then((res) => res.json()).then(setMethods);
   }, []);
 
-  // Fetch parameter templates when method changes
   useEffect(() => {
     if (brewData.method_id) {
       fetch(`${BREWING_METHOD_URL}${brewData.method_id}/parameters/`)
@@ -41,7 +51,32 @@ function AddBrew() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "method_id" && value === "add_new_method") {
+      setShowNewMethodInput(true);
+      return;
+    }
     setBrewData({ ...brewData, [name]: value });
+  };
+
+  const handleAddNewMethod = () => {
+    const name = newMethodName.trim();
+    if (!name) return;
+    fetch(BREWING_METHOD_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to create method");
+        return res.json();
+      })
+      .then((newMethod) => {
+        setMethods((prev) => [...prev, newMethod]);
+        setBrewData((prev) => ({ ...prev, method_id: String(newMethod.id) }));
+        setNewMethodName("");
+        setShowNewMethodInput(false);
+      })
+      .catch(() => setMessage("Error creating new method"));
   };
 
   const handleParameterChange = (e) => {
@@ -57,10 +92,7 @@ function AddBrew() {
   const handleAddCustomParam = (e) => {
     e.preventDefault();
     if (newCustomParam.name.trim() !== "") {
-      setCustomParameters([
-        ...customParameters,
-        { name: newCustomParam.name, value: newCustomParam.value }
-      ]);
+      setCustomParameters([...customParameters, { name: newCustomParam.name, value: newCustomParam.value }]);
       setNewCustomParam({ name: "", value: "" });
     }
   };
@@ -72,16 +104,10 @@ function AddBrew() {
   };
 
   const handleRemoveParam = (paramName) => {
-    // Remove from template parameters
-    const updatedBrewParameters = { ...brewParameters };
-    delete updatedBrewParameters[paramName];
-    setBrewParameters(updatedBrewParameters);
-
-    // Remove from parameterTemplates
-    setParameterTemplates(parameterTemplates.filter(param => param.parameter_name !== paramName));
-
-    // Remove from custom parameters (if needed)
-    setCustomParameters(customParameters.filter(param => param.name !== paramName));
+    const updated = { ...brewParameters };
+    delete updated[paramName];
+    setBrewParameters(updated);
+    setParameterTemplates(parameterTemplates.filter((p) => p.parameter_name !== paramName));
   };
 
   const handleRemoveCustomParam = (index) => {
@@ -90,9 +116,12 @@ function AddBrew() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Combine template and custom parameters
-    const allParameters = { ...brewParameters };
-    customParameters.forEach(param => {
+    const allParameters = {};
+    if (coffeeDose.trim() !== "") {
+      allParameters["Coffee Dose"] = coffeeDose;
+    }
+    Object.assign(allParameters, brewParameters);
+    customParameters.forEach((param) => {
       allParameters[param.name] = param.value;
     });
     const payload = { ...brewData, parameters: allParameters };
@@ -118,6 +147,7 @@ function AddBrew() {
         setParameterTemplates([]);
         setBrewParameters({});
         setCustomParameters([]);
+        setCoffeeDose("");
       })
       .catch(() => setMessage("Error adding brew"));
   };
@@ -145,23 +175,6 @@ function AddBrew() {
         </label>
         <br />
         <label>
-          Grinder:
-          <select
-            name="grinder_id"
-            value={brewData.grinder_id}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select</option>
-            {grinders.map((grinder) => (
-              <option key={grinder.id} value={grinder.id}>
-                {grinder.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <br />
-        <label>
           Brewing Method:
           <select
             name="method_id"
@@ -173,6 +186,36 @@ function AddBrew() {
             {methods.map((method) => (
               <option key={method.id} value={method.id}>
                 {method.name}
+              </option>
+            ))}
+            <option value="add_new_method">+ Add New Method</option>
+          </select>
+        </label>
+        {showNewMethodInput && (
+          <span>
+            <input
+              type="text"
+              value={newMethodName}
+              onChange={(e) => setNewMethodName(e.target.value)}
+              placeholder="New method name"
+            />
+            <button type="button" onClick={handleAddNewMethod}>Confirm</button>
+            <button type="button" onClick={() => { setShowNewMethodInput(false); setNewMethodName(""); }}>Cancel</button>
+          </span>
+        )}
+        <br />
+        <label>
+          Grinder:
+          <select
+            name="grinder_id"
+            value={brewData.grinder_id}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select</option>
+            {grinders.map((grinder) => (
+              <option key={grinder.id} value={grinder.id}>
+                {grinder.name}
               </option>
             ))}
           </select>
@@ -200,7 +243,16 @@ function AddBrew() {
           />
         </label>
         <br />
-        {/* Show parameter templates if available */}
+        <label>
+          Coffee Dose:
+          <input
+            type="text"
+            value={coffeeDose}
+            onChange={(e) => setCoffeeDose(e.target.value)}
+            placeholder="e.g. 18g"
+          />
+        </label>
+        <br />
         {parameterTemplates.length > 0 && (
           <div>
             <h4>Parameters for selected method:</h4>
@@ -228,7 +280,6 @@ function AddBrew() {
             ))}
           </div>
         )}
-        {/* List custom parameters */}
         {customParameters.length > 0 && (
           <div>
             <h4>Custom Parameters:</h4>
@@ -239,7 +290,7 @@ function AddBrew() {
                   <input
                     type="text"
                     value={param.value}
-                    onChange={e => handleCustomParamValueChange(idx, e.target.value)}
+                    onChange={(e) => handleCustomParamValueChange(idx, e.target.value)}
                   />
                   <button
                     type="button"
@@ -254,7 +305,6 @@ function AddBrew() {
             ))}
           </div>
         )}
-        {/* Custom parameters */}
         <div>
           <h4>Add Custom Parameter:</h4>
           <input

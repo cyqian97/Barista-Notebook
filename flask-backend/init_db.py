@@ -46,21 +46,16 @@ method_parameter_templates = [
     # Aeropress
     {"method_name": "Aeropress", "parameter_name": "Water Temperature", "description": "Temperature of water used for brewing"},
     {"method_name": "Aeropress", "parameter_name": "Brew Time", "description": "Total time for brewing"},
-    {"method_name": "Aeropress", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
     # Kalita
     {"method_name": "Kalita", "parameter_name": "Water Temperature", "description": "Temperature of water used for brewing"},
     {"method_name": "Kalita", "parameter_name": "Brew Time", "description": "Total time for brewing"},
-    {"method_name": "Kalita", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
     # Espresso
     {"method_name": "Espresso", "parameter_name": "Pressure", "description": "Pressure applied during extraction"},
     {"method_name": "Espresso", "parameter_name": "Brew Time", "description": "Total time for brewing"},
-    {"method_name": "Espresso", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
     # Cold Brew
     {"method_name": "Cold Brew", "parameter_name": "Brew Time", "description": "Total time for brewing"},
-    {"method_name": "Cold Brew", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
     # Moka Pot
     {"method_name": "Moka Pot", "parameter_name": "Water Volume", "description": "Amount of water used"},
-    {"method_name": "Moka Pot", "parameter_name": "Coffee Dose", "description": "Amount of coffee used"},
 ]
 
 with app.app_context():

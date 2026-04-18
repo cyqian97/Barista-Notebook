@@ -60,10 +60,21 @@ docker-compose up
 
 ### Initialize the Database
 
-On first run, populate the database with sample data (grinders, brewing methods, parameter templates, and sample beans):
+On first run, or to reset the database with sample data (grinders, brewing methods, parameter templates, and sample beans):
 
+**With Docker:**
 ```bash
-python flask-backend/init_db.py
+docker compose down
+rm flask-backend/instance/coffee.db
+docker compose up --build
+# in a separate terminal, once the backend container is running:
+docker compose exec backend python init_db.py
+```
+
+**Without Docker (local Flask):**
+```bash
+cd flask-backend
+python init_db.py
 ```
 
 ## Development
