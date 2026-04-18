@@ -6,8 +6,10 @@ A full-stack coffee brewing tracking application. Record and manage your coffee 
 
 - Manage coffee bean inventory with detailed metadata (origin, process, roast, variety, etc.)
 - Record brew sessions with method-specific parameters
-- Supports multiple brewing methods: Aeropress, Kalita, Espresso, and more
-- Track grind size, water temperature, brew time, and tasting notes
+- Supports multiple brewing methods: Aeropress, Kalita, Espresso, and more; create new methods on the fly
+- Track grind size, coffee dose, water temperature, brew time, and tasting notes
+- Quick-brew or view brews for a specific bean directly from the beans table
+- Filter brew history by bean and method (multi-select)
 
 ## Project Structure
 
@@ -121,6 +123,7 @@ docker compose up
 | POST   | `/brews/`                             | Add a new brew                     |
 | GET    | `/grinders/`                          | List all grinders                  |
 | GET    | `/brewing-methods/`                   | List all brewing methods           |
+| POST   | `/brewing-methods/`                   | Create a new brewing method        |
 | GET    | `/brewing-methods/<id>/parameters/`   | Get parameters for a method        |
 
 ## Database Models
