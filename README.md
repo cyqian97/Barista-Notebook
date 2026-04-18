@@ -1,44 +1,122 @@
-## Project Setup
-### Run the Project
-Create a ```Dockerfile``` in the frontend folder and the backend folder, and a ```docker-compose.yml``` file in the ```/usr/app``` folder. See the github repository for the content of these files. 
-Run the following commands to build and run the frontend and backend images:
+# Barista Notebook
+
+A full-stack coffee brewing tracking application. Record and manage your coffee beans, brewing sessions, and parameters across different brewing methods.
+
+## Features
+
+- Manage coffee bean inventory with detailed metadata (origin, process, roast, variety, etc.)
+- Record brew sessions with method-specific parameters
+- Supports multiple brewing methods: Aeropress, Kalita, Espresso, and more
+- Track grind size, water temperature, brew time, and tasting notes
+
+## Project Structure
+
 ```
+Barista-Notebook/
+├── docker-compose.yml
+├── barista-app/                  # React frontend
+│   ├── Dockerfile
+│   ├── .env.development          # Backend URL for local dev
+│   ├── .env.production           # Backend URL for production
+│   └── src/
+│       ├── index.js              # App entry point and routes
+│       ├── config.js             # API base URL configuration
+│       ├── AddBrew.js            # Create new brew records
+│       ├── Beans.js              # Coffee bean management
+│       ├── Brews.js              # Brew history view
+│       └── ReturnHomeButton.js   # Shared navigation component
+└── flask-backend/                # Flask backend
+    ├── Dockerfile
+    ├── app.py                    # API routes and database models
+    ├── init_db.py                # Database initialization script
+    └── instance/
+        └── coffee.db             # SQLite database
+```
+
+## Tech Stack
+
+| Layer    | Technology                        |
+|----------|-----------------------------------|
+| Frontend | React 19, React Router            |
+| Backend  | Flask, SQLAlchemy, Flask-CORS     |
+| Database | SQLite                            |
+| DevOps   | Docker, Docker Compose            |
+
+## Getting Started
+
+### Prerequisites
+
+- Docker and Docker Compose
+
+### Run with Docker
+
+```bash
 docker-compose build
-docker-compose up 
+docker-compose up
 ```
 
-### Create Frontend and Backend
-(P.S.: I am using npm installed in WSL directily now, so ignore the node:22-ubuntu22.04 docker part.)
-- Spin up the development environment. Change directory to the parent folder of the app and run the following command
-```
-docker run -it --name <Dev Env Name> -v .:/usr/app cyqian97/node:22-ubuntu22.04 bash
-```
-- Create a react frontend app. In the development container, run: 
-```
-cd /usr/app
-npm init react-app --legacy-peer-deps <Frontend Name>
-npm install --legacy-peer-deps ajv@^8
-```
-This step installs all necessary packages in the frontend folder. The ```npm install``` process takes forever in the ```node:22-alpine``` docker image, so I created the ```cyqian97/node:22-ubuntu22.04``` image to handle all the npm installations. This can avoid the ```npm install``` process in the latter ```docker-compose up``` step.
-- Create a flask backend. Still in the container, run
-```
-mkdir <Backend Name> && cd <Backend Name>
-python3 -m venv venv
-source venv/bin/activate
-pip install flask flask-sqlalchemy
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
+
+### Initialize the Database
+
+On first run, populate the database with sample data (grinders, brewing methods, parameter templates, and sample beans):
+
+```bash
+python flask-backend/init_db.py
 ```
 
-## Frontend
-### Configure Backend Url
-The backend url is set in the ```.env.development``` and ```.env.production``` files.
-The first file is used when the frontend docker runs ```npm start```; the second is used when ```npm run build``` is executed.
+## Development
 
-### Add New Package
-After add a new package to the frontend environment, a re-build of the docker image is required.
-Below is a precedure that tested to be safe:
+### Frontend (barista-app/)
+
+```bash
+cd barista-app
+npm install --legacy-peer-deps
+npm start        # Dev server on port 3000
+npm test         # Run tests
+npm run build    # Production build
 ```
+
+> **Note:** Always use `--legacy-peer-deps` when installing packages due to React 19 compatibility.
+
+### Backend (flask-backend/)
+
+```bash
+cd flask-backend
+python init_db.py   # Initialize or reset database
+python app.py       # Run Flask dev server on port 5000
+```
+
+### Adding New npm Packages
+
+After adding a new frontend package, rebuild the Docker image:
+
+```bash
 docker compose down
 rm -rf barista-app/node_modules
 docker compose build --no-cache
 docker compose up
 ```
+
+## API Endpoints
+
+| Method | Endpoint                              | Description                        |
+|--------|---------------------------------------|------------------------------------|
+| GET    | `/coffee-beans/`                      | List all beans (sorted by recency) |
+| POST   | `/coffee-beans/`                      | Add a new bean                     |
+| DELETE | `/coffee-beans/<id>`                  | Delete a bean                      |
+| GET    | `/brews/`                             | List all brew records              |
+| POST   | `/brews/`                             | Add a new brew                     |
+| GET    | `/grinders/`                          | List all grinders                  |
+| GET    | `/brewing-methods/`                   | List all brewing methods           |
+| GET    | `/brewing-methods/<id>/parameters/`   | Get parameters for a method        |
+
+## Database Models
+
+- **CoffeeBean** — Bean metadata: name, country, process, roast, region, farm, variety, roaster, harvest info, notes
+- **Brew** — Brew session: links to bean, grinder, and method; stores grind size, date, and tasting notes
+- **BrewParameter** — Key-value parameters per brew (e.g., water temperature, brew time)
+- **BrewingMethod** — Supported brewing methods
+- **MethodParameterTemplate** — Parameter definitions per brewing method
+- **Grinder** — Grinder equipment registry

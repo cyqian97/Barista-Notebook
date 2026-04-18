@@ -1,11 +1,25 @@
-Show brew for a bean page
+## Coffee Beans Page /beans
 
+- for each row, in the action column, add two buttons
 
-## Coffee Beans Page
-check adding beans
-create a brew from a bean
+    1. brew: this will go to a add brew page, with the bean already selected as the bean in this row
 
-## Add Brew Page
+    2. show: show all brews of this bean (this should direct to the Show Brew Page)
 
-## Show Brew Page
-Show brew parameter in the order of adding
+<!-- not for now, later we may want to filter beans on the beans page and then show all brews for them -->
+
+## Add Brew Page /addbrew
+
+- make coffee dose a universal parameter, not a template parameter under "Parameters for selected method:"
+
+- move "brewing method" above "grinder"
+
+- for a brew created, save all the custom parameter names to the template of this method so that they will show up under "Parameters for selected method:" next time the same method is selected
+
+- in the drop down menu of the "brewing method", add an option called "add new method". This will create a new brew method.
+
+## Show Brew Page /brews
+
+- Add filtering by coffee bean and brew method (multiple selection). In the selection memu of the bean filtering, ordered them by the last time the bean is used (same logic as the /beans page)
+
+- In each brew card, show brew parameter in the order of adding
