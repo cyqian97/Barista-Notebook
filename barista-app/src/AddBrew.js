@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { COFFEE_BEAN_URL, BREW_URL, BASE_URL, BREWING_METHOD_URL } from "./config";
 import ReturnHomeButton from "./ReturnHomeButton";
+import "./AddBrew.css";
 
 function AddBrew() {
   const [searchParams] = useSearchParams();
@@ -153,191 +154,128 @@ function AddBrew() {
   };
 
   return (
-    <div>
+    <div className="add-brew-page">
       <ReturnHomeButton />
-      <h2>Add Brew</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Coffee Bean:
-          <select
-            name="coffee_bean_id"
-            value={brewData.coffee_bean_id}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select</option>
+      <h2>⚗️ Add Brew</h2>
+      <form className="brew-form" onSubmit={handleSubmit}>
+
+        <div className="form-group">
+          <label>Coffee Bean</label>
+          <select name="coffee_bean_id" value={brewData.coffee_bean_id} onChange={handleChange} required>
+            <option value="">Select a bean...</option>
             {coffeeBeans.map((bean) => (
-              <option key={bean.id} value={bean.id}>
-                {bean.name}
-              </option>
+              <option key={bean.id} value={bean.id}>{bean.name}</option>
             ))}
           </select>
-        </label>
-        <br />
-        <label>
-          Brewing Method:
-          <select
-            name="method_id"
-            value={brewData.method_id}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select</option>
+        </div>
+
+        <div className="form-group">
+          <label>Brewing Method</label>
+          <select name="method_id" value={brewData.method_id} onChange={handleChange} required>
+            <option value="">Select a method...</option>
             {methods.map((method) => (
-              <option key={method.id} value={method.id}>
-                {method.name}
-              </option>
+              <option key={method.id} value={method.id}>{method.name}</option>
             ))}
             <option value="add_new_method">+ Add New Method</option>
           </select>
-        </label>
-        {showNewMethodInput && (
-          <span>
-            <input
-              type="text"
-              value={newMethodName}
-              onChange={(e) => setNewMethodName(e.target.value)}
-              placeholder="New method name"
-            />
-            <button type="button" onClick={handleAddNewMethod}>Confirm</button>
-            <button type="button" onClick={() => { setShowNewMethodInput(false); setNewMethodName(""); }}>Cancel</button>
-          </span>
-        )}
-        <br />
-        <label>
-          Grinder:
-          <select
-            name="grinder_id"
-            value={brewData.grinder_id}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select</option>
+          {showNewMethodInput && (
+            <div className="new-method-row">
+              <input
+                type="text"
+                value={newMethodName}
+                onChange={(e) => setNewMethodName(e.target.value)}
+                placeholder="New method name"
+              />
+              <button type="button" className="btn-secondary" onClick={handleAddNewMethod}>Confirm</button>
+              <button type="button" className="btn-ghost" onClick={() => { setShowNewMethodInput(false); setNewMethodName(""); }}>Cancel</button>
+            </div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label>Grinder</label>
+          <select name="grinder_id" value={brewData.grinder_id} onChange={handleChange} required>
+            <option value="">Select a grinder...</option>
             {grinders.map((grinder) => (
-              <option key={grinder.id} value={grinder.id}>
-                {grinder.name}
-              </option>
+              <option key={grinder.id} value={grinder.id}>{grinder.name}</option>
             ))}
           </select>
-        </label>
-        <br />
-        <label>
-          Grind Size:
-          <input
-            type="number"
-            name="grind_size"
-            value={brewData.grind_size}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          Date Brewed:
-          <input
-            type="datetime-local"
-            name="date_brewed"
-            value={brewData.date_brewed}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          Coffee Dose:
-          <input
-            type="text"
-            value={coffeeDose}
-            onChange={(e) => setCoffeeDose(e.target.value)}
-            placeholder="e.g. 18g"
-          />
-        </label>
-        <br />
-        {parameterTemplates.length > 0 && (
-          <div>
-            <h4>Parameters for selected method:</h4>
-            {parameterTemplates.map((param) => (
-              <div key={param.id}>
-                <label>
-                  {param.parameter_name}:
-                  <input
-                    type="text"
-                    name={param.parameter_name}
-                    value={brewParameters[param.parameter_name] || ""}
-                    onChange={handleParameterChange}
-                    placeholder={param.description}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveParam(param.parameter_name)}
-                    style={{ marginLeft: "8px" }}
-                  >
-                    Remove
-                  </button>
-                </label>
-                <br />
-              </div>
-            ))}
-          </div>
-        )}
-        {customParameters.length > 0 && (
-          <div>
-            <h4>Custom Parameters:</h4>
-            {customParameters.map((param, idx) => (
-              <div key={idx}>
-                <label>
-                  {param.name}:
-                  <input
-                    type="text"
-                    value={param.value}
-                    onChange={(e) => handleCustomParamValueChange(idx, e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveCustomParam(idx)}
-                    style={{ marginLeft: "8px" }}
-                  >
-                    Remove
-                  </button>
-                </label>
-                <br />
-              </div>
-            ))}
-          </div>
-        )}
-        <div>
-          <h4>Add Custom Parameter:</h4>
-          <input
-            type="text"
-            name="name"
-            value={newCustomParam.name}
-            onChange={handleCustomParamChange}
-            placeholder="Parameter Name"
-          />
-          <input
-            type="text"
-            name="value"
-            value={newCustomParam.value}
-            onChange={handleCustomParamChange}
-            placeholder="Parameter Value"
-          />
-          <button type="button" onClick={handleAddCustomParam}>
-            Add
-          </button>
         </div>
-        <br />
-        <label>
-          Tasting Notes:
-          <textarea
-            name="tasting_notes"
-            value={brewData.tasting_notes}
-            onChange={handleChange}
-          />
-        </label>
-        <br />
-        <button type="submit">Add Brew</button>
+
+        <div className="form-group">
+          <label>Grind Size</label>
+          <input type="number" name="grind_size" value={brewData.grind_size} onChange={handleChange} required />
+        </div>
+
+        <div className="form-group">
+          <label>Date Brewed</label>
+          <input type="datetime-local" name="date_brewed" value={brewData.date_brewed} onChange={handleChange} required />
+        </div>
+
+        <div className="form-group">
+          <label>Coffee Dose</label>
+          <input type="text" value={coffeeDose} onChange={(e) => setCoffeeDose(e.target.value)} placeholder="e.g. 18g" />
+        </div>
+
+        {parameterTemplates.length > 0 && (
+          <div className="form-section">
+            <h4>Method Parameters</h4>
+            {parameterTemplates.map((param) => (
+              <div key={param.id} className="param-row">
+                <label>{param.parameter_name}</label>
+                <input
+                  type="text"
+                  name={param.parameter_name}
+                  value={brewParameters[param.parameter_name] || ""}
+                  onChange={handleParameterChange}
+                  placeholder={param.description}
+                />
+                <button type="button" className="btn-remove" onClick={() => handleRemoveParam(param.parameter_name)}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {customParameters.length > 0 && (
+          <div className="form-section">
+            <h4>Custom Parameters</h4>
+            {customParameters.map((param, idx) => (
+              <div key={idx} className="param-row">
+                <label>{param.name}</label>
+                <input
+                  type="text"
+                  value={param.value}
+                  onChange={(e) => handleCustomParamValueChange(idx, e.target.value)}
+                />
+                <button type="button" className="btn-remove" onClick={() => handleRemoveCustomParam(idx)}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="form-section">
+          <h4>Add Custom Parameter</h4>
+          <div className="custom-param-inputs">
+            <input type="text" name="name" value={newCustomParam.name} onChange={handleCustomParamChange} placeholder="Parameter name" />
+            <input type="text" name="value" value={newCustomParam.value} onChange={handleCustomParamChange} placeholder="Value" />
+            <button type="button" className="btn-secondary" onClick={handleAddCustomParam}>Add</button>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>Tasting Notes</label>
+          <textarea name="tasting_notes" value={brewData.tasting_notes} onChange={handleChange} rows={3} />
+        </div>
+
+        <div className="form-submit">
+          <button type="submit">☕ Add Brew</button>
+        </div>
       </form>
-      {message && <p>{message}</p>}
+      {message && (
+        <div className={`status-message ${message.includes("success") ? "success" : "error"}`}>
+          {message}
+        </div>
+      )}
     </div>
   );
 }

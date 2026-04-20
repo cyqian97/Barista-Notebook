@@ -1,3 +1,38 @@
+.brews-filters {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px var(--shadow);
+  margin-bottom: 20px;
+}
+
+.brews-filters > div { display: flex; flex-direction: column; gap: 6px; }
+
+.brews-filters label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--roast);
+}
+
+.brews-filters select { min-width: 200px; }
+
+.brews-filters button {
+  margin-top: 4px;
+  align-self: flex-start;
+  background: var(--cream);
+  color: var(--roast);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.brews-filters button:hover { background: var(--latte); }
+
 .brews-container {
   display: flex;
   flex-wrap: wrap;
@@ -5,23 +40,54 @@
 }
 
 .brew-box {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
   width: 300px;
-  background: #fafafa;
-  box-shadow: 2px 2px 8px #eee;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.brew-box:hover {
+  box-shadow: 0 6px 18px rgba(44, 26, 14, 0.14);
+  transform: translateY(-2px);
 }
 
 .brew-box h3 {
-  margin-top: 0;
+  margin: 0 0 12px 0;
+  font-size: 0.95rem;
+  color: var(--roast);
+  border-bottom: 1px solid var(--cream);
+  padding-bottom: 8px;
 }
 
+.brew-box p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: var(--espresso);
+}
+
+.brew-box strong { color: var(--roast); }
+
 .brew-parameters {
-  margin-top: 8px;
+  margin-top: 12px;
+  background: var(--parchment);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.brew-parameters > strong {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--roast);
 }
 
 .brew-parameters ul {
-  padding-left: 18px;
-  margin: 0;
+  padding-left: 16px;
+  margin: 6px 0 0 0;
+  font-size: 13px;
 }
+
+.brew-parameters li { margin-bottom: 3px; }

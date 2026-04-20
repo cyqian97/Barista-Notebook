@@ -48,12 +48,12 @@ function Brews() {
     return beanMatch && methodMatch;
   });
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="page">Loading...</div>;
 
   return (
-    <div>
+    <div className="page">
+      <h1>☕ All Brews</h1>
       <ReturnHomeButton />
-      <h2>All Brews</h2>
       <div className="brews-filters">
         <div>
           <label>Filter by Bean (hold Ctrl/Cmd for multiple):</label>
@@ -66,7 +66,7 @@ function Brews() {
             ))}
           </select>
           {selectedBeans.length > 0 && (
-            <button type="button" onClick={() => setSelectedBeans([])}>Clear</button>
+            <button type="button" className="btn-ghost" onClick={() => setSelectedBeans([])}>Clear</button>
           )}
         </div>
         <div>
@@ -80,14 +80,14 @@ function Brews() {
             ))}
           </select>
           {selectedMethods.length > 0 && (
-            <button type="button" onClick={() => setSelectedMethods([])}>Clear</button>
+            <button type="button" className="btn-ghost" onClick={() => setSelectedMethods([])}>Clear</button>
           )}
         </div>
       </div>
       <div className="brews-container">
         {filteredBrews.map((brew) => (
           <div key={brew.id} className="brew-box">
-            <h3>Brew #{brew.id}</h3>
+            <h3>☕ Brew #{brew.id}</h3>
             <p><strong>Coffee Bean:</strong> {brew.coffee_bean_name || brew.coffee_bean_id}</p>
             <p><strong>Grinder:</strong> {brew.grinder_name || brew.grinder_id}</p>
             <p><strong>Method:</strong> {brew.method_name || brew.method_id}</p>

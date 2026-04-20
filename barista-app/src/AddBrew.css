@@ -1,0 +1,103 @@
+.add-brew-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 32px;
+}
+
+.add-brew-page h2 { text-align: center; margin-bottom: 24px; }
+
+.brew-form {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 32px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group > label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--roast);
+  margin-bottom: 6px;
+}
+
+.form-section {
+  border-top: 1px solid var(--cream);
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.form-section h4 {
+  font-family: Georgia, serif;
+  color: var(--roast);
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.param-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.param-row > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--espresso);
+  min-width: 150px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.param-row input { flex: 1; }
+
+.param-row .btn-remove {
+  background: var(--danger-bg);
+  color: var(--danger);
+  padding: 6px 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.param-row .btn-remove:hover { background: var(--danger); color: white; }
+
+.custom-param-inputs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.custom-param-inputs input { flex: 1; }
+
+.new-method-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.new-method-row input { flex: 1; }
+
+.form-submit {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.form-submit button {
+  background: var(--roast);
+  color: var(--cream);
+  padding: 12px 40px;
+  font-size: 15px;
+  border-radius: 8px;
+}
+.form-submit button:hover { background: var(--espresso); }

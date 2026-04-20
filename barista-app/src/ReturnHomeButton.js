@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 function ReturnHomeButton() {
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <Link to="/"><button>Return to Index Page</button></Link>
-    </div>
+    <Link to="/" className="return-home-link">
+      ← Home
+    </Link>
   );
 }
 
