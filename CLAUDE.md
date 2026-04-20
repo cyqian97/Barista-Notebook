@@ -13,29 +13,50 @@ Barista Notebook is a full-stack coffee brewing tracking application with a Reac
 - **Main Routes**:
   - `/` - Home page with navigation
   - `/beans` - Coffee bean management (Beans.js)
-  - `/addbrew` - Create new brew records (AddBrew.js)
-  - `/brews` - View all brew history (Brews.js)
+  - `/addbrew` - Create new brew records (AddBrew.js); also handles editing via `?edit=<id>`
+  - `/brews` - View all brew history with edit/delete per card (Brews.js)
+  - `/equipment` - Manage grinders, brewing methods, and parameter templates (Equipment.js)
 - **API Configuration**: Backend URL configured in `.env.development` (localhost:5000) and `.env.production` files, accessed via `src/config.js`
 
 ### Backend (flask-backend/)
-- **Framework**: Flask with SQLAlchemy ORM
-- **Database**: SQLite (coffee.db) with five main models:
+- **Framework**: Flask with SQLAlchemy ORM and Flask-Migrate
+- **Database**: SQLite (coffee.db) with the following models:
   - `CoffeeBean` - Coffee bean metadata (name, country, process, roast, region, farm, variety, etc.)
   - `Brew` - Brew session records with foreign keys to CoffeeBean, Grinder, and BrewingMethod
-  - `BrewParameter` - Dynamic key-value parameters for each brew (water temp, brew time, etc.)
+  - `BrewParameter` - Key-value parameters for each brew (water temp, brew time, etc.)
   - `BrewingMethod` - Supported brewing methods (Aeropress, Kalita, Espresso, etc.)
-  - `MethodParameterTemplate` - Parameter templates for each brewing method
-  - `Grinder` - Grinder equipment used
+  - `MethodParameterTemplate` - Parameter templates per brewing method; managed in Equipment page
+  - `CommonParameterTemplate` - Parameter templates shown on every brew regardless of method; managed in Equipment page
+  - `Grinder` - Grinder equipment registry
 - **Key endpoints**:
-  - `/coffee-beans/` - GET (list) and POST (add)
+  - `/coffee-beans/` - GET (list), POST (add)
   - `/coffee-beans/<id>` - DELETE
-  - `/brews/` - GET (list) and POST (add)
-  - `/grinders/` - GET
-  - `/brewing-methods/` - GET
-  - `/brewing-methods/<id>/parameters/` - GET method-specific parameter templates
+  - `/brews/` - GET (list), POST (add)
+  - `/brews/<id>` - GET (single), PUT (update), DELETE
+  - `/grinders/` - GET, POST
+  - `/grinders/<id>` - DELETE
+  - `/brewing-methods/` - GET, POST
+  - `/brewing-methods/<id>` - DELETE
+  - `/brewing-methods/<id>/parameters/` - GET, POST
+  - `/brewing-methods/<id>/parameters/<id>` - DELETE
+  - `/common-parameters/` - GET, POST
+  - `/common-parameters/<id>` - DELETE
+
+### Database Schema Changes
+Flask-Migrate is configured. After modifying a model in `app.py`:
+```bash
+docker compose exec backend flask db migrate -m "describe change"
+docker compose exec backend flask db upgrade
+```
 
 ### Database Initialization
-Run `python flask-backend/init_db.py` to create tables and populate with sample data (grinders, brewing methods, parameter templates, and sample beans).
+To reset and reseed with sample data:
+```bash
+docker compose down
+rm flask-backend/instance/coffee.db
+docker compose up --build
+docker compose exec backend python init_db.py
+```
 
 ## Development Commands
 
@@ -71,26 +92,34 @@ python init_db.py        # Initialize/reset database with sample data
 python app.py            # Run Flask dev server (port 5000)
 ```
 
-### Testing
-```bash
-cd barista-app
-npm test                 # Frontend tests
-```
-
 ## Key Implementation Details
 
 ### Frontend-Backend Communication
 - All API URLs are centralized in `barista-app/src/config.js` using `REACT_APP_BACKEND_URL` environment variable
 - Backend URL is set in `.env.development` for local dev and `.env.production` for production builds
 
-### Brew Parameter System
-The application uses a flexible parameter system:
-- Each brewing method has templates defined in `MethodParameterTemplate` (e.g., "Water Temperature", "Brew Time")
-- When creating a brew, parameters are stored as key-value pairs in `BrewParameter` table
-- This allows different methods to have different parameters without schema changes
+### Three-Tier Brew Parameter System
+Parameters are organized into three types, each with a different scope:
+
+| Type | Scope | Template model | Managed in |
+|------|-------|----------------|------------|
+| **Common** | Every brew | `CommonParameterTemplate` | Equipment page |
+| **Method** | Brews using a specific method | `MethodParameterTemplate` | Equipment page |
+| **Brew Record** | A single individual brew | None (ad-hoc) | Add Brew form |
+
+- Common and method parameters appear as pre-filled input fields when recording a brew.
+- Brew record parameters are ad-hoc key-value fields added per brew; they are **never** auto-saved to any template.
+- "Coffee Dose" is a hardcoded universal field on the Add Brew form — do not add it to any template.
+- All parameter values are stored as `BrewParameter` rows regardless of type.
+
+### Edit Brew Flow
+- `/addbrew?edit=<id>` puts AddBrew into edit mode.
+- On load, the brew is fetched and params are distributed across the three tiers by comparing against loaded templates.
+- A `templatesLoaded` flag prevents the distribution effect from running before method templates finish loading (race condition guard).
+- On submit, a PUT request is sent instead of POST. The form stays populated after saving (no reset).
 
 ### Coffee Bean Ordering
-Coffee beans are ordered by `last_use_date` (descending, nulls last) in the `/coffee-beans/` endpoint, showing recently used beans first.
+Coffee beans are ordered by `last_use_date` (descending, nulls last) in the `/coffee-beans/` endpoint.
 
 ## Environment Notes
 - The project was originally developed using WSL with local npm installation
