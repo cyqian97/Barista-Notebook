@@ -311,7 +311,7 @@ function AddBrew() {
         )}
 
         <div className="form-section">
-          <h4>Add Custom Parameter</h4>
+          <h4>Brew Record</h4>
           <div className="custom-param-inputs">
             <input type="text" name="name" value={newCustomParam.name} onChange={handleCustomParamChange} placeholder="Parameter name" />
             <input type="text" name="value" value={newCustomParam.value} onChange={handleCustomParamChange} placeholder="Value" />

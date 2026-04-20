@@ -5,10 +5,10 @@
 
 ## Add Brew Page /addbrew
 
-- Only save method parameters to the method template in the equipement page. For the "Add Custom Parameter" in addbrew page, do not save them.
 
-- allow edit extra common parameters
 
 ## Show Brew Page /brews
+
+- Add edit button for each brew card
 
 ## Equipment Page /equipment
