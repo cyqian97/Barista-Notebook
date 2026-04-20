@@ -139,6 +139,19 @@ def get_grinders():
     grinders = Grinder.query.all()
     return jsonify([{"id": g.id, "name": g.name} for g in grinders])
 
+@app.route('/grinders/', methods=['POST'])
+def add_grinder():
+    data = request.json
+    name = data.get('name', '').strip()
+    if not name:
+        return jsonify({"error": "Grinder name is required"}), 400
+    if Grinder.query.filter_by(name=name).first():
+        return jsonify({"error": "Grinder already exists"}), 409
+    new_grinder = Grinder(name=name)
+    db.session.add(new_grinder)
+    db.session.commit()
+    return jsonify({"id": new_grinder.id, "name": new_grinder.name}), 201
+
 @app.route('/brewing-methods/')
 def get_brewing_methods():
     brewing_methods = BrewingMethod.query.all()
@@ -157,6 +170,21 @@ def add_brewing_method():
     db.session.commit()
     return jsonify({"id": new_method.id, "name": new_method.name}), 201
 
+@app.route('/grinders/<int:id>', methods=['DELETE'])
+def delete_grinder(id):
+    grinder = Grinder.query.get_or_404(id)
+    db.session.delete(grinder)
+    db.session.commit()
+    return jsonify({"message": "Grinder deleted"}), 200
+
+@app.route('/brewing-methods/<int:id>', methods=['DELETE'])
+def delete_brewing_method(id):
+    method = BrewingMethod.query.get_or_404(id)
+    MethodParameterTemplate.query.filter_by(method_id=id).delete()
+    db.session.delete(method)
+    db.session.commit()
+    return jsonify({"message": "Brewing method deleted"}), 200
+
 @app.route('/brewing-methods/<int:method_id>/parameters/')
 def get_method_parameters(method_id):
     templates = MethodParameterTemplate.query.filter_by(method_id=method_id).all()
@@ -164,6 +192,29 @@ def get_method_parameters(method_id):
         {"id": t.id, "parameter_name": t.parameter_name, "description": t.description}
         for t in templates
     ])
+
+@app.route('/brewing-methods/<int:method_id>/parameters/', methods=['POST'])
+def add_method_parameter(method_id):
+    BrewingMethod.query.get_or_404(method_id)
+    data = request.json
+    name = data.get('parameter_name', '').strip()
+    if not name:
+        return jsonify({"error": "Parameter name is required"}), 400
+    template = MethodParameterTemplate(
+        method_id=method_id,
+        parameter_name=name,
+        description=data.get('description', '')
+    )
+    db.session.add(template)
+    db.session.commit()
+    return jsonify({"id": template.id, "parameter_name": template.parameter_name, "description": template.description}), 201
+
+@app.route('/brewing-methods/<int:method_id>/parameters/<int:param_id>', methods=['DELETE'])
+def delete_method_parameter(method_id, param_id):
+    template = MethodParameterTemplate.query.filter_by(id=param_id, method_id=method_id).first_or_404()
+    db.session.delete(template)
+    db.session.commit()
+    return jsonify({"message": "Parameter deleted"}), 200
 
 @app.route('/brews/', methods=['POST'])
 def add_brew():

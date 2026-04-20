@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { COFFEE_BEAN_URL, BREW_URL, BASE_URL, BREWING_METHOD_URL } from "./config";
+import { COFFEE_BEAN_URL, BREW_URL, BASE_URL, BREWING_METHOD_URL, GRINDER_URL } from "./config";
 import ReturnHomeButton from "./ReturnHomeButton";
 import "./AddBrew.css";
 
@@ -16,6 +16,8 @@ function AddBrew() {
   const [coffeeDose, setCoffeeDose] = useState("");
   const [newMethodName, setNewMethodName] = useState("");
   const [showNewMethodInput, setShowNewMethodInput] = useState(false);
+  const [newGrinderName, setNewGrinderName] = useState("");
+  const [showNewGrinderInput, setShowNewGrinderInput] = useState(false);
   const [brewData, setBrewData] = useState({
     coffee_bean_id: "",
     grinder_id: "",
@@ -56,7 +58,32 @@ function AddBrew() {
       setShowNewMethodInput(true);
       return;
     }
+    if (name === "grinder_id" && value === "add_new_grinder") {
+      setShowNewGrinderInput(true);
+      return;
+    }
     setBrewData({ ...brewData, [name]: value });
+  };
+
+  const handleAddNewGrinder = () => {
+    const name = newGrinderName.trim();
+    if (!name) return;
+    fetch(GRINDER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to create grinder");
+        return res.json();
+      })
+      .then((newGrinder) => {
+        setGrinders((prev) => [...prev, newGrinder]);
+        setBrewData((prev) => ({ ...prev, grinder_id: String(newGrinder.id) }));
+        setNewGrinderName("");
+        setShowNewGrinderInput(false);
+      })
+      .catch(() => setMessage("Error creating new grinder"));
   };
 
   const handleAddNewMethod = () => {
@@ -199,7 +226,20 @@ function AddBrew() {
             {grinders.map((grinder) => (
               <option key={grinder.id} value={grinder.id}>{grinder.name}</option>
             ))}
+            <option value="add_new_grinder">+ Add New Grinder</option>
           </select>
+          {showNewGrinderInput && (
+            <div className="new-method-row">
+              <input
+                type="text"
+                value={newGrinderName}
+                onChange={(e) => setNewGrinderName(e.target.value)}
+                placeholder="New grinder name"
+              />
+              <button type="button" className="btn-secondary" onClick={handleAddNewGrinder}>Confirm</button>
+              <button type="button" className="btn-ghost" onClick={() => { setShowNewGrinderInput(false); setNewGrinderName(""); }}>Cancel</button>
+            </div>
+          )}
         </div>
 
         <div className="form-group">

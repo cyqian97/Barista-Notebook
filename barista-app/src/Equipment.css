@@ -1,0 +1,131 @@
+.equipment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 700px) {
+  .equipment-grid { grid-template-columns: 1fr; }
+}
+
+.equip-section h2 { margin-top: 0; }
+
+/* List */
+.equip-list {
+  list-style: none;
+  margin: 0 0 16px 0;
+  padding: 0;
+}
+
+.equip-item,
+.method-item {
+  border-bottom: 1px solid var(--cream);
+  padding: 8px 0;
+}
+
+.equip-item:last-child,
+.method-item:last-child { border-bottom: none; }
+
+.equip-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.equip-empty {
+  font-size: 13px;
+  color: #8B6244;
+  font-style: italic;
+  padding: 6px 0;
+}
+
+/* Small button variant */
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+/* Add form row */
+.equip-add-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.equip-add-form input { flex: 1; }
+
+/* Method expand */
+.method-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.method-toggle {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--roast);
+  cursor: pointer;
+  text-align: left;
+  flex: 1;
+}
+
+.method-toggle:hover { color: var(--espresso); }
+.method-toggle:active { transform: none; }
+
+/* Parameters panel */
+.params-panel {
+  background: var(--parchment);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 8px;
+}
+
+.params-panel h4 {
+  margin: 0 0 10px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--roast);
+}
+
+.params-list {
+  list-style: none;
+  margin: 0 0 12px 0;
+  padding: 0;
+}
+
+.param-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.param-item:last-child { border-bottom: none; }
+
+.param-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.param-name { font-weight: 600; color: var(--espresso); }
+.param-desc { font-size: 12px; color: #8B6244; }
+
+.param-add-form {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.param-add-form input { flex: 1; min-width: 100px; }

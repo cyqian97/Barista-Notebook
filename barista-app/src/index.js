@@ -5,6 +5,7 @@ import './index.css';
 import Beans from './Beans';
 import Brews from './Brews';
 import AddBrew from './AddBrew';
+import Equipment from './Equipment';
 import reportWebVitals from './reportWebVitals';
 
 function Home() {
@@ -31,6 +32,11 @@ function Home() {
           <span className="nav-card-title">All Brews</span>
           <span className="nav-card-desc">Browse your brew history</span>
         </Link>
+        <Link to="/equipment" className="nav-card">
+          <span className="nav-card-icon">🔧</span>
+          <span className="nav-card-title">Equipment</span>
+          <span className="nav-card-desc">Manage grinders & brew methods</span>
+        </Link>
       </nav>
     </div>
   );
@@ -44,6 +50,7 @@ function Main() {
         <Route path="/beans" element={<Beans />} />
         <Route path="/addbrew" element={<AddBrew />} />
         <Route path="/brews" element={<Brews />} />
+        <Route path="/equipment" element={<Equipment />} />
       </Routes>
     </BrowserRouter>
   );
