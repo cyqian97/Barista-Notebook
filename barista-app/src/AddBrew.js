@@ -139,13 +139,6 @@ function AddBrew() {
     setCustomParameters(updated);
   };
 
-  const handleRemoveParam = (paramName) => {
-    const updated = { ...brewParameters };
-    delete updated[paramName];
-    setBrewParameters(updated);
-    setParameterTemplates(parameterTemplates.filter((p) => p.parameter_name !== paramName));
-  };
-
   const handleRemoveCustomParam = (index) => {
     setCustomParameters(customParameters.filter((_, i) => i !== index));
   };
@@ -295,7 +288,6 @@ function AddBrew() {
                   onChange={handleParameterChange}
                   placeholder={param.description}
                 />
-                <button type="button" className="btn-remove" onClick={() => handleRemoveParam(param.parameter_name)}>✕</button>
               </div>
             ))}
           </div>
