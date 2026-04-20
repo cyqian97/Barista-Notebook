@@ -297,6 +297,14 @@ def get_brew(brew_id):
         "parameters": [{"name": p.parameter_name, "value": p.value} for p in parameters]
     })
 
+@app.route('/brews/<int:brew_id>', methods=['DELETE'])
+def delete_brew(brew_id):
+    brew = Brew.query.get_or_404(brew_id)
+    BrewParameter.query.filter_by(brew_id=brew_id).delete()
+    db.session.delete(brew)
+    db.session.commit()
+    return jsonify({"message": "Brew deleted"}), 200
+
 @app.route('/brews/<int:brew_id>', methods=['PUT'])
 def update_brew(brew_id):
     brew = Brew.query.get_or_404(brew_id)

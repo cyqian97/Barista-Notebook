@@ -43,6 +43,14 @@ function Brews() {
     setSelectedMethods(selected);
   };
 
+  const handleDeleteBrew = (id) => {
+    if (!window.confirm("Delete this brew?")) return;
+    fetch(`${BREW_URL}${id}`, { method: "DELETE" })
+      .then((res) => { if (!res.ok) throw new Error(); })
+      .then(() => setBrews((prev) => prev.filter((b) => b.id !== id)))
+      .catch(() => alert("Error deleting brew"));
+  };
+
   const filteredBrews = brews.filter((brew) => {
     const beanMatch = selectedBeans.length === 0 || selectedBeans.includes(String(brew.coffee_bean_id));
     const methodMatch = selectedMethods.length === 0 || selectedMethods.includes(String(brew.method_id));
@@ -91,6 +99,7 @@ function Brews() {
             <div className="brew-box-header">
               <h3>☕ Brew #{brew.id}</h3>
               <button className="btn-ghost btn-sm" onClick={() => navigate(`/addbrew?edit=${brew.id}`)}>✏️ Edit</button>
+              <button className="btn-danger btn-sm" onClick={() => handleDeleteBrew(brew.id)}>🗑 Delete</button>
             </div>
             <p><strong>Coffee Bean:</strong> {brew.coffee_bean_name || brew.coffee_bean_id}</p>
             <p><strong>Grinder:</strong> {brew.grinder_name || brew.grinder_id}</p>
