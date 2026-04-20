@@ -276,6 +276,43 @@ def add_brew():
 
     return jsonify({"message": "Brew added successfully", "brew_id": new_brew.id}), 201
 
+@app.route('/brews/<int:brew_id>', methods=['GET'])
+def get_brew(brew_id):
+    brew = Brew.query.get_or_404(brew_id)
+    coffee_bean = CoffeeBean.query.get(brew.coffee_bean_id)
+    grinder = Grinder.query.get(brew.grinder_id)
+    method = BrewingMethod.query.get(brew.method_id)
+    parameters = BrewParameter.query.filter_by(brew_id=brew.id).order_by(BrewParameter.id).all()
+    return jsonify({
+        "id": brew.id,
+        "coffee_bean_id": brew.coffee_bean_id,
+        "coffee_bean_name": coffee_bean.name if coffee_bean else None,
+        "grinder_id": brew.grinder_id,
+        "grinder_name": grinder.name if grinder else None,
+        "method_id": brew.method_id,
+        "method_name": method.name if method else None,
+        "grind_size": brew.grind_size,
+        "date_brewed": brew.date_brewed.isoformat() if brew.date_brewed else None,
+        "tasting_notes": brew.tasting_notes,
+        "parameters": [{"name": p.parameter_name, "value": p.value} for p in parameters]
+    })
+
+@app.route('/brews/<int:brew_id>', methods=['PUT'])
+def update_brew(brew_id):
+    brew = Brew.query.get_or_404(brew_id)
+    data = request.json
+    brew.coffee_bean_id = data['coffee_bean_id']
+    brew.grinder_id = data['grinder_id']
+    brew.method_id = data['method_id']
+    brew.grind_size = data['grind_size']
+    brew.date_brewed = datetime.fromisoformat(data['date_brewed']) if data.get('date_brewed') else brew.date_brewed
+    brew.tasting_notes = data.get('tasting_notes', '')
+    BrewParameter.query.filter_by(brew_id=brew_id).delete()
+    for param_name, value in data.get('parameters', {}).items():
+        db.session.add(BrewParameter(brew_id=brew_id, parameter_name=param_name, value=value))
+    db.session.commit()
+    return jsonify({"message": "Brew updated successfully", "brew_id": brew_id})
+
 @app.route('/brews/', methods=['GET'])
 def get_all_brews():
     brews = Brew.query.all()

@@ -54,6 +54,21 @@
   transform: translateY(-2px);
 }
 
+.brew-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--cream);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.brew-box-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--roast);
+}
+
 .brew-box h3 {
   margin: 0 0 12px 0;
   font-size: 0.95rem;

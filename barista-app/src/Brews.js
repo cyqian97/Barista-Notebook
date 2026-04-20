@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { BREW_URL, COFFEE_BEAN_URL } from "./config";
 import ReturnHomeButton from "./ReturnHomeButton";
 import "./Brews.css";
 
 function Brews() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [brews, setBrews] = useState([]);
   const [beans, setBeans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +88,10 @@ function Brews() {
       <div className="brews-container">
         {filteredBrews.map((brew) => (
           <div key={brew.id} className="brew-box">
-            <h3>☕ Brew #{brew.id}</h3>
+            <div className="brew-box-header">
+              <h3>☕ Brew #{brew.id}</h3>
+              <button className="btn-ghost btn-sm" onClick={() => navigate(`/addbrew?edit=${brew.id}`)}>✏️ Edit</button>
+            </div>
             <p><strong>Coffee Bean:</strong> {brew.coffee_bean_name || brew.coffee_bean_id}</p>
             <p><strong>Grinder:</strong> {brew.grinder_name || brew.grinder_id}</p>
             <p><strong>Method:</strong> {brew.method_name || brew.method_id}</p>

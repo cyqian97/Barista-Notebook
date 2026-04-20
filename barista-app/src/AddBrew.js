@@ -16,6 +16,10 @@ function AddBrew() {
   const [commonParameterTemplates, setCommonParameterTemplates] = useState([]);
   const [commonParamValues, setCommonParamValues] = useState({});
   const [coffeeDose, setCoffeeDose] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editBrewId, setEditBrewId] = useState(null);
+  const [pendingEditParams, setPendingEditParams] = useState(null);
+  const [templatesLoaded, setTemplatesLoaded] = useState(true);
   const [newMethodName, setNewMethodName] = useState("");
   const [showNewMethodInput, setShowNewMethodInput] = useState(false);
   const [newGrinderName, setNewGrinderName] = useState("");
@@ -41,15 +45,60 @@ function AddBrew() {
     fetch(BASE_URL + "grinders/").then((res) => res.json()).then(setGrinders);
     fetch(BASE_URL + "brewing-methods/").then((res) => res.json()).then(setMethods);
     fetch(COMMON_PARAMS_URL).then((res) => res.json()).then(setCommonParameterTemplates);
+
+    const editId = searchParams.get("edit");
+    if (editId) {
+      setIsEditing(true);
+      setEditBrewId(editId);
+      fetch(`${BREW_URL}${editId}`)
+        .then((res) => res.json())
+        .then((brew) => {
+          setBrewData({
+            coffee_bean_id: String(brew.coffee_bean_id),
+            grinder_id: String(brew.grinder_id),
+            method_id: String(brew.method_id),
+            grind_size: String(brew.grind_size),
+            date_brewed: brew.date_brewed ? brew.date_brewed.slice(0, 16) : "",
+            tasting_notes: brew.tasting_notes || "",
+          });
+          setPendingEditParams(brew.parameters);
+        });
+    }
   }, []);
 
   useEffect(() => {
+    if (!pendingEditParams || !templatesLoaded) return;
+    const methodParamNames = new Set(parameterTemplates.map((p) => p.parameter_name));
+    const commonParamNames = new Set(commonParameterTemplates.map((p) => p.parameter_name));
+    const newBrewParams = {};
+    const newCommonValues = {};
+    const newBrewRecordParams = [];
+    let newCoffeeDose = "";
+    pendingEditParams.forEach(({ name, value }) => {
+      if (name === "Coffee Dose") newCoffeeDose = value;
+      else if (commonParamNames.has(name)) newCommonValues[name] = value;
+      else if (methodParamNames.has(name)) newBrewParams[name] = value;
+      else newBrewRecordParams.push({ name, value });
+    });
+    setCoffeeDose(newCoffeeDose);
+    setCommonParamValues(newCommonValues);
+    setBrewParameters(newBrewParams);
+    setCustomParameters(newBrewRecordParams);
+    setPendingEditParams(null);
+  }, [pendingEditParams, templatesLoaded, commonParameterTemplates]);
+
+  useEffect(() => {
+    setTemplatesLoaded(false);
     if (brewData.method_id) {
       fetch(`${BREWING_METHOD_URL}${brewData.method_id}/parameters/`)
         .then((res) => res.json())
-        .then(setParameterTemplates);
+        .then((data) => {
+          setParameterTemplates(data);
+          setTemplatesLoaded(true);
+        });
     } else {
       setParameterTemplates([]);
+      setTemplatesLoaded(true);
     }
     setBrewParameters({});
     setCustomParameters([]);
@@ -157,30 +206,34 @@ function AddBrew() {
       allParameters[param.name] = param.value;
     });
     const payload = { ...brewData, parameters: allParameters };
-    fetch(BREW_URL, {
-      method: "POST",
+    const url = isEditing ? `${BREW_URL}${editBrewId}` : BREW_URL;
+    const method = isEditing ? "PUT" : "POST";
+    fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to add brew");
+        if (!res.ok) throw new Error("Failed to save brew");
         return res.json();
       })
       .then(() => {
-        setMessage("Brew added successfully!");
-        setBrewData({
-          coffee_bean_id: "",
-          grinder_id: "",
-          method_id: "",
-          grind_size: "",
-          date_brewed: "",
-          tasting_notes: "",
-        });
-        setParameterTemplates([]);
-        setBrewParameters({});
-        setCustomParameters([]);
-        setCoffeeDose("");
-        setCommonParamValues({});
+        setMessage(isEditing ? "Brew updated successfully!" : "Brew added successfully!");
+        if (!isEditing) {
+          setBrewData({
+            coffee_bean_id: "",
+            grinder_id: "",
+            method_id: "",
+            grind_size: "",
+            date_brewed: "",
+            tasting_notes: "",
+          });
+          setParameterTemplates([]);
+          setBrewParameters({});
+          setCustomParameters([]);
+          setCoffeeDose("");
+          setCommonParamValues({});
+        }
       })
       .catch(() => setMessage("Error adding brew"));
   };
@@ -188,7 +241,7 @@ function AddBrew() {
   return (
     <div className="add-brew-page">
       <ReturnHomeButton />
-      <h2>⚗️ Add Brew</h2>
+      <h2>{isEditing ? `✏️ Edit Brew #${editBrewId}` : "⚗️ Add Brew"}</h2>
       <form className="brew-form" onSubmit={handleSubmit}>
 
         <div className="form-group">
@@ -293,25 +346,19 @@ function AddBrew() {
           </div>
         )}
 
-        {customParameters.length > 0 && (
-          <div className="form-section">
-            <h4>Custom Parameters</h4>
-            {customParameters.map((param, idx) => (
-              <div key={idx} className="param-row">
-                <label>{param.name}</label>
-                <input
-                  type="text"
-                  value={param.value}
-                  onChange={(e) => handleCustomParamValueChange(idx, e.target.value)}
-                />
-                <button type="button" className="btn-remove" onClick={() => handleRemoveCustomParam(idx)}>✕</button>
-              </div>
-            ))}
-          </div>
-        )}
-
         <div className="form-section">
-          <h4>Brew Record</h4>
+          <h4>Brew Record Parameters</h4>
+          {customParameters.map((param, idx) => (
+            <div key={idx} className="param-row">
+              <label>{param.name}</label>
+              <input
+                type="text"
+                value={param.value}
+                onChange={(e) => handleCustomParamValueChange(idx, e.target.value)}
+              />
+              <button type="button" className="btn-remove" onClick={() => handleRemoveCustomParam(idx)}>✕</button>
+            </div>
+          ))}
           <div className="custom-param-inputs">
             <input type="text" name="name" value={newCustomParam.name} onChange={handleCustomParamChange} placeholder="Parameter name" />
             <input type="text" name="value" value={newCustomParam.value} onChange={handleCustomParamChange} placeholder="Value" />
@@ -325,7 +372,7 @@ function AddBrew() {
         </div>
 
         <div className="form-submit">
-          <button type="submit">☕ Add Brew</button>
+          <button type="submit">{isEditing ? "💾 Save Changes" : "☕ Add Brew"}</button>
         </div>
       </form>
       {message && (
