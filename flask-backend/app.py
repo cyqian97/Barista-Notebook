@@ -1,12 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_migrate import Migrate
 from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coffee.db'
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Models
 class CoffeeBean(db.Model):
@@ -61,6 +63,11 @@ class MethodParameterTemplate(db.Model):
     description = db.Column(db.Text)
 
     method = db.relationship('BrewingMethod', backref=db.backref('parameter_templates', lazy=True))
+
+class CommonParameterTemplate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    parameter_name = db.Column(db.String(100), nullable=False, unique=True)
+    description = db.Column(db.Text)
 
 
 # # Automatically create tables if they don't exist
@@ -216,6 +223,31 @@ def delete_method_parameter(method_id, param_id):
     db.session.commit()
     return jsonify({"message": "Parameter deleted"}), 200
 
+@app.route('/common-parameters/', methods=['GET'])
+def get_common_parameters():
+    params = CommonParameterTemplate.query.all()
+    return jsonify([{"id": p.id, "parameter_name": p.parameter_name, "description": p.description} for p in params])
+
+@app.route('/common-parameters/', methods=['POST'])
+def add_common_parameter():
+    data = request.json
+    name = data.get('parameter_name', '').strip()
+    if not name:
+        return jsonify({"error": "Parameter name is required"}), 400
+    if CommonParameterTemplate.query.filter_by(parameter_name=name).first():
+        return jsonify({"error": "Parameter already exists"}), 409
+    param = CommonParameterTemplate(parameter_name=name, description=data.get('description', ''))
+    db.session.add(param)
+    db.session.commit()
+    return jsonify({"id": param.id, "parameter_name": param.parameter_name, "description": param.description}), 201
+
+@app.route('/common-parameters/<int:param_id>', methods=['DELETE'])
+def delete_common_parameter(param_id):
+    param = CommonParameterTemplate.query.get_or_404(param_id)
+    db.session.delete(param)
+    db.session.commit()
+    return jsonify({"message": "Common parameter deleted"}), 200
+
 @app.route('/brews/', methods=['POST'])
 def add_brew():
     data = request.json
@@ -231,12 +263,8 @@ def add_brew():
     db.session.add(new_brew)
     db.session.commit()  # Commit to get new_brew.id
 
-    # Add BrewParameter records and save new param names to method template
+    # Add BrewParameter records
     parameters = data.get('parameters', {})
-    existing_template_names = {
-        t.parameter_name
-        for t in MethodParameterTemplate.query.filter_by(method_id=new_brew.method_id).all()
-    }
     for param_name, value in parameters.items():
         param = BrewParameter(
             brew_id=new_brew.id,
@@ -244,13 +272,6 @@ def add_brew():
             value=value
         )
         db.session.add(param)
-        if param_name not in existing_template_names:
-            db.session.add(MethodParameterTemplate(
-                method_id=new_brew.method_id,
-                parameter_name=param_name,
-                description=""
-            ))
-            existing_template_names.add(param_name)
     db.session.commit()
 
     return jsonify({"message": "Brew added successfully", "brew_id": new_brew.id}), 201

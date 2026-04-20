@@ -1,5 +1,5 @@
 # Run this script to initialize the database
-from app import app, db, CoffeeBean, Grinder, BrewingMethod, MethodParameterTemplate
+from app import app, db, CoffeeBean, Grinder, BrewingMethod, MethodParameterTemplate, CommonParameterTemplate
 from datetime import datetime
 
 # Sample data to populate the database

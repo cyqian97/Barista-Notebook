@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReturnHomeButton from "./ReturnHomeButton";
-import { GRINDER_URL, BREWING_METHOD_URL, METHOD_PARAMS_URL } from "./config";
+import { GRINDER_URL, BREWING_METHOD_URL, METHOD_PARAMS_URL, COMMON_PARAMS_URL } from "./config";
 import "./Equipment.css";
 
 function Equipment() {
@@ -12,10 +12,14 @@ function Equipment() {
   const [methodParams, setMethodParams] = useState({});
   const [newParamName, setNewParamName] = useState("");
   const [newParamDesc, setNewParamDesc] = useState("");
+  const [commonParams, setCommonParams] = useState([]);
+  const [newCommonParamName, setNewCommonParamName] = useState("");
+  const [newCommonParamDesc, setNewCommonParamDesc] = useState("");
 
   useEffect(() => {
     fetch(GRINDER_URL).then((r) => r.json()).then(setGrinders);
     fetch(BREWING_METHOD_URL).then((r) => r.json()).then(setMethods);
+    fetch(COMMON_PARAMS_URL).then((r) => r.json()).then(setCommonParams);
   }, []);
 
   const loadParams = (methodId) => {
@@ -83,6 +87,28 @@ function Equipment() {
       .catch(() => alert("Error deleting method"));
   };
 
+  // Common parameter actions
+  const handleAddCommonParam = (e) => {
+    e.preventDefault();
+    const name = newCommonParamName.trim();
+    if (!name) return;
+    fetch(COMMON_PARAMS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ parameter_name: name, description: newCommonParamDesc.trim() }),
+    })
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((p) => { setCommonParams((prev) => [...prev, p]); setNewCommonParamName(""); setNewCommonParamDesc(""); })
+      .catch(() => alert("Error: parameter may already exist"));
+  };
+
+  const handleDeleteCommonParam = (id) => {
+    fetch(`${COMMON_PARAMS_URL}${id}`, { method: "DELETE" })
+      .then((r) => { if (!r.ok) throw new Error(); })
+      .then(() => setCommonParams((prev) => prev.filter((p) => p.id !== id)))
+      .catch(() => alert("Error deleting parameter"));
+  };
+
   // Parameter actions
   const handleAddParam = (e, methodId) => {
     e.preventDefault();
@@ -141,6 +167,38 @@ function Equipment() {
               value={newGrinderName}
               onChange={(e) => setNewGrinderName(e.target.value)}
               placeholder="Grinder name"
+            />
+            <button type="submit" className="btn-primary btn-sm">+ Add</button>
+          </form>
+        </div>
+
+        {/* Common Parameters */}
+        <div className="equip-section card">
+          <h2>📋 Extra Common Parameters</h2>
+          <ul className="equip-list">
+            {commonParams.map((p) => (
+              <li key={p.id} className="equip-item">
+                <div className="param-info">
+                  <span className="param-name">{p.parameter_name}</span>
+                  {p.description && <span className="param-desc">{p.description}</span>}
+                </div>
+                <button className="btn-danger btn-sm" onClick={() => handleDeleteCommonParam(p.id)}>🗑 Delete</button>
+              </li>
+            ))}
+            {commonParams.length === 0 && <li className="equip-empty">No common parameters yet</li>}
+          </ul>
+          <form className="param-add-form" onSubmit={handleAddCommonParam}>
+            <input
+              type="text"
+              value={newCommonParamName}
+              onChange={(e) => setNewCommonParamName(e.target.value)}
+              placeholder="Parameter name"
+            />
+            <input
+              type="text"
+              value={newCommonParamDesc}
+              onChange={(e) => setNewCommonParamDesc(e.target.value)}
+              placeholder="Description (optional)"
             />
             <button type="submit" className="btn-primary btn-sm">+ Add</button>
           </form>

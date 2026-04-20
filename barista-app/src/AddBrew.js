@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { COFFEE_BEAN_URL, BREW_URL, BASE_URL, BREWING_METHOD_URL, GRINDER_URL } from "./config";
+import { COFFEE_BEAN_URL, BREW_URL, BASE_URL, BREWING_METHOD_URL, GRINDER_URL, COMMON_PARAMS_URL } from "./config";
 import ReturnHomeButton from "./ReturnHomeButton";
 import "./AddBrew.css";
 
@@ -13,6 +13,8 @@ function AddBrew() {
   const [brewParameters, setBrewParameters] = useState({});
   const [customParameters, setCustomParameters] = useState([]);
   const [newCustomParam, setNewCustomParam] = useState({ name: "", value: "" });
+  const [commonParameterTemplates, setCommonParameterTemplates] = useState([]);
+  const [commonParamValues, setCommonParamValues] = useState({});
   const [coffeeDose, setCoffeeDose] = useState("");
   const [newMethodName, setNewMethodName] = useState("");
   const [showNewMethodInput, setShowNewMethodInput] = useState(false);
@@ -38,6 +40,7 @@ function AddBrew() {
     });
     fetch(BASE_URL + "grinders/").then((res) => res.json()).then(setGrinders);
     fetch(BASE_URL + "brewing-methods/").then((res) => res.json()).then(setMethods);
+    fetch(COMMON_PARAMS_URL).then((res) => res.json()).then(setCommonParameterTemplates);
   }, []);
 
   useEffect(() => {
@@ -107,6 +110,11 @@ function AddBrew() {
       .catch(() => setMessage("Error creating new method"));
   };
 
+  const handleCommonParamChange = (e) => {
+    const { name, value } = e.target;
+    setCommonParamValues({ ...commonParamValues, [name]: value });
+  };
+
   const handleParameterChange = (e) => {
     const { name, value } = e.target;
     setBrewParameters({ ...brewParameters, [name]: value });
@@ -148,6 +156,9 @@ function AddBrew() {
     if (coffeeDose.trim() !== "") {
       allParameters["Coffee Dose"] = coffeeDose;
     }
+    Object.entries(commonParamValues).forEach(([k, v]) => {
+      if (v.trim() !== "") allParameters[k] = v;
+    });
     Object.assign(allParameters, brewParameters);
     customParameters.forEach((param) => {
       allParameters[param.name] = param.value;
@@ -176,6 +187,7 @@ function AddBrew() {
         setBrewParameters({});
         setCustomParameters([]);
         setCoffeeDose("");
+        setCommonParamValues({});
       })
       .catch(() => setMessage("Error adding brew"));
   };
@@ -256,6 +268,19 @@ function AddBrew() {
           <label>Coffee Dose</label>
           <input type="text" value={coffeeDose} onChange={(e) => setCoffeeDose(e.target.value)} placeholder="e.g. 18g" />
         </div>
+
+        {commonParameterTemplates.map((param) => (
+          <div key={param.id} className="form-group">
+            <label>{param.parameter_name}</label>
+            <input
+              type="text"
+              name={param.parameter_name}
+              value={commonParamValues[param.parameter_name] || ""}
+              onChange={handleCommonParamChange}
+              placeholder={param.description || ""}
+            />
+          </div>
+        ))}
 
         {parameterTemplates.length > 0 && (
           <div className="form-section">
